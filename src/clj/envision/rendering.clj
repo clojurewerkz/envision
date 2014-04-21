@@ -6,11 +6,11 @@
             [me.raynes.fs :as fs]
             [cheshire.core :as json]
 
+
+            [clojure-csv.core :as csv]
             [clojurewerkz.statistiker.distribution :as d]
             [clojurewerkz.statistiker.histograms :as hist]))
 
-
-;; (clojure.java.io/resource "public/javascripts/application.js")
 (defn render
   [data]
   (let [env {:widgets {:main-content 'envision.widgets.home/index-content,
@@ -39,10 +39,42 @@
     (browse-url (str "file://" index))))
 
 (defn render-histogram
-  [v & {:keys [graph-title]}]
+  "Renders a histogram of the vector"
+  [v & {:keys [graph-title width height]}]
   (prepare-tmp-dir
    (map (fn [[k v]]
           {:x (format "%.2f" k) :y v})
         (hist/numerical-histogram 10 v))))
 
+(defn render-scatterplot
+  "Renders a histogram of the vector"
+  [data & {:keys [x-fn y-fn metadata] :or {x-fn identity
+                                           y-fn identity
+                                           metatata {}}}]
+  (prepare-tmp-dir
+   (map (fn [i]
+          {:x (x-fn i) :y (y-fn i)}))))
 ;; (take 2000 (d/normal-distribution 200 20))
+
+;; Line Chart
+;; Axes: identify axe type
+;; Area
+;; Scatterplot
+;; Bar chart
+
+(defn data
+  []
+  (let [[head & data] (csv/parse-csv (slurp "/Users/ifesdjeen/p/codecentric/envision/example_data.tsv") :delimiter \tab)
+        cleanup (fn [i] (map (fn [n]
+                              (try (Double/parseDouble n)
+                                   (catch Exception _
+                                     n)))
+                            i))]
+    (map #(zipmap head (cleanup %)) data)))
+
+(defn render-free-graph
+  "Renders a histogram of the vector"
+  [data & {:keys [x-fn y-fn metadata] :or {x-fn identity
+                                           y-fn identity
+                                           metatata {}}}]
+  (prepare-tmp-dir data))
