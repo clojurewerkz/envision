@@ -2,6 +2,36 @@
   (:require-macros [schema.macros :as sm])
   (:require [schema.core             :as s]))
 
+(defrecord Interpolations
+    [^{:s s/Str} linear
+     ^{:s s/Str} linear-closed
+     ^{:s s/Str} step-before
+     ^{:s s/Str} step-after
+     ^{:s s/Str} basis
+     ^{:s s/Str} basis-open
+     ^{:s s/Str} basis-closed
+     ^{:s s/Str} bundle
+     ^{:s s/Str} cardinal
+     ^{:s s/Str} cardinal-open
+     ^{:s s/Str} cardinal-closed
+     ^{:s s/Str} monotone])
+
+(def interpolations
+  (->Interpolations
+   "linear"
+   "linear-closed"
+   "step-before"
+   "step-after"
+   "basis"
+   "basis-open"
+   "basis-closed"
+   "bundle"
+   "cardinal"
+   "cardinal-open"
+   "cardinal-closed"
+   "monotone"
+   ))
+
 (defn- make-svg
   [node width height]
   (.newSvg js/dimple node width height))
@@ -20,8 +50,22 @@
 ;;
 ;;
 
-(def line (-> js/dimple .-plot .-line))
+(defrecord SeriesTypeConstructor
+    [^{:s s/Any} line
+     ^{:s s/Any} bubble
+     ^{:s s/Any} area
+     ^{:s s/Any} bar])
 
+(def line   (-> js/dimple .-plot .-line))
+(def bubble (-> js/dimple .-plot .-bubble))
+(def area   (-> js/dimple .-plot .-area))
+(def bar    (-> js/dimple .-plot .-bar))
+
+(def series-type-constructors
+  (->SeriesTypeConstructor line
+                           bubble
+                           area
+                           bar))
 ;;
 ;; Configuration
 ;;
@@ -60,8 +104,6 @@
                        axis-type)]
     (apply c chart args)))
 
-
-
 (defn set-data
   [chart data]
   (set! (.-data chart) data)
@@ -74,10 +116,13 @@
   chart)
 
 (defn add-series
-  [chart series chart-type & {:keys [interpolation]}]
-  (let [series (.addSeries chart series chart-type)]
+  [chart series-literals series-type & {:keys [interpolation]}]
+  (let [series (.addSeries chart
+                           series-literals
+                           (sm/safe-get series-type-constructors
+                                        series-type))]
     (when interpolation
-      (set! (.-interpolation series) interpolation)))
+      (set! (.-interpolation series) (sm/safe-get interpolations interpolation))))
   chart)
 
 (defn draw
