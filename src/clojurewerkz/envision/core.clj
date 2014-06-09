@@ -1,9 +1,12 @@
-(ns clojurewerkz.envision
+(ns clojurewerkz.envision.core
   (:require [me.raynes.fs        :as fs]
             [cheshire.core       :as json]
             [clojure.java.io     :as io]
+            [schema.core         :as s]
 
             [clojure.java.browse :refer [browse-url]]))
+
+
 
 (defn prepare-tmp-dir
   "Prepares a tmp directory with all templates and returns a path to it"
