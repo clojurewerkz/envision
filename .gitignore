@@ -11,4 +11,4 @@ pom.xml.asc
 _site
 .bundle
 bin
-cljs
+resources/assets/cljs
