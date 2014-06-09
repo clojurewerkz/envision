@@ -11,6 +11,19 @@ production (e.g. it will never be something user-facing), and is intended to be
 used by people who'd like to yield some information from their data, it should 
 be stable enough from the very early releases.
 
+## General Approach
+
+Main idea of this library is to make exploratory analysis more interactive and visual,
+although in programmer's way. Envision creates a "throwaway environment" every time
+you, for example, make a line chart. You can modify chart the way you want, change
+all the possible configuration parameters, filter data, add exponents the ways we 
+wouldn't be able to program for you.
+
+We concluded that visual environments are often constraining, and creating an API
+for every since feature would make it amazingly big and bloated. So we do a bare 
+minimum, which is already helpful by default through the API and let you configure
+everything you could've possibly imagined yourself: adding interactivity, combining
+charts, customizing layouts and so on.
 
 ## Dependency Information (Artifacts)
 
