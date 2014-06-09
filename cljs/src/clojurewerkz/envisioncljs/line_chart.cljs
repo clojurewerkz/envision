@@ -2,20 +2,20 @@
   (:require-macros [schema.macros :as sm])
   (:require [reagent.core            :as reagent :refer [atom]]
             [clojure.set             :as set]
-            [schema.core             :as s]))
+            [schema.core             :as s]
+
+            [clojurewerkz.envisioncljs.dimple :as dimple]
+            [clojurewerkz.envisioncljs.utils  :as u]))
 
 (enable-console-print!)
 
 (sm/defrecord LineChartConfig
     [^{:s s/Str} x
      ^{:s s/Str} y
-
      ])
+
 (sm/defrecord LineChartState
     [^{:s s/Any}                 chart
-     ^{:s s/Any}                 x-axis
-     ^{:s s/Any}                 y-axis
-     ^{:s s/Any}                 data-raw
      ^{:s s/Bool}                did-unmount])
 
 (defn validate-line-chart-state
@@ -24,31 +24,28 @@
 
 (defn make-empty-line-chart-state
   []
-  (LineChartState. nil nil nil nil false))
+  (LineChartState. nil false))
 
 (defn- init-line-chart
   [this line-chart-config line-chart-state data]
-  (let [width             520
-        height            250
+  (let [width   620
+        height  350
+        bound-x 60
+        bound-y 30
 
-        svg               (.newSvg js/dimple (.getDOMNode this) width height)
-        chart             (new dimple/chart svg data)
-
-        x-axis            (.addCategoryAxis  chart "x" (sm/safe-get line-chart-config :x))
-        y-axis            (.addMeasureAxis chart "y" (sm/safe-get line-chart-config :y))]
-
-    ;;(set! (.-tickFormat x-axis ) "%H:%M:%S")
-    ;;(set! (.-tickFormat y-axis ) "s")
+        chart   (dimple/make-chart (u/dom-node this) width height)]
 
     (validate-line-chart-state
      (swap! line-chart-state #(assoc %
-                                :x-axis x-axis
-                                :y-axis y-axis
                                 :chart  chart)))
 
-    (.setBounds chart 40 30 (- width 50) (- height 50))
-    (.addSeries chart nil (-> js/dimple .-plot .-line))
-    (.draw chart)
+    (-> chart
+        (dimple/set-data          data)
+        (dimple/add-category-axis "x" (sm/safe-get line-chart-config :x) :order-rule "Date")
+        (dimple/add-measure-axis  "y" (sm/safe-get line-chart-config :y))
+        (dimple/add-series        nil dimple/line)
+        (dimple/set-bounds        bound-x bound-y (- width (* 2 bound-x)) (- height (* 3 bound-y)))
+        (dimple/draw))
     ))
 
 (defn line-chart
@@ -57,14 +54,11 @@
                (let [a @line-chart-state]
                  [:div {:class "envision-chart"
                         :key   "envision-line-chart"} ""]))
-    {:should-component-update (fn [this]
-                                true)
-     :component-did-mount
-     (fn [this]
-       (init-line-chart this
-                        line-chart-config
-                        line-chart-state
-                        data))}
+    {:component-did-mount (fn [this]
+                            (init-line-chart this
+                                             line-chart-config
+                                             line-chart-state
+                                             data))}
     ))
 
 (defn line-chart-app
