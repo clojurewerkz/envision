@@ -27,19 +27,20 @@
       (fs/copy (clojure.java.io/resource file) (str path "/" file)))
 
     (fs/copy-dir (clojure.java.io/resource "src") (io/file (str path "/cljs/src" )))
-    (fs/copy (clojure.java.io/resource "project.clj") (str path "/cljs/project.clj"))
+    (fs/copy (clojure.java.io/resource "template.project.clj") (str path "/cljs/project.clj"))
 
-    (spit (str path "/assets/data/data.json") (json/generate-string data))
+    (spit (str path "/assets/data/data.js") (str "var renderData = "(json/generate-string data) ";"))
     path
     ;; (browse-url (str "file://" index))
     ))
 
 (comment
-  (cfg/make-chart-config
-   {:id          "line"
-    :x           "year"
-    :y           "income"
-    :x-order     "year"
-    :series-type "line"
-    :data        test-data
-    }))
+  (prepare-tmp-dir
+   [(cfg/make-chart-config
+     {:id          "line"
+      :x           "year"
+      :y           "income"
+      :x-order     "year"
+      :series-type "line"
+      :data        test-data
+      })]))

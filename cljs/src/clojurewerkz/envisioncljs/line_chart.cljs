@@ -63,9 +63,12 @@
   []
   (fn []
     [:div
-     [(line-chart
-       (->LineChartConfig "Month" "Unit Sales")
-       (atom (make-empty-line-chart-state))
-       js/renderData)]]))
+     (let [data (js->clj js/renderData :keywordize-keys true)]
+      (println (first (first (first data))))
+      [:div
+       [(line-chart
+         (->LineChartConfig "Month" "Unit Sales")
+         (atom (make-empty-line-chart-state))
+         js/renderData)]])]))
 
 (reagent/render-component [line-chart-app] (.getElementById js/document "app"))
