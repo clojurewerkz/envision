@@ -1,12 +1,14 @@
 (ns clojurewerkz.envision.core
-  (:require [me.raynes.fs        :as fs]
-            [cheshire.core       :as json]
-            [clojure.java.io     :as io]
-            [schema.core         :as s]
+  (:require [me.raynes.fs                       :as fs]
+            [cheshire.core                      :as json]
+            [clojure.java.io                    :as io]
+            [schema.core                        :as s]
+            [clojurewerkz.envision.chart-config :as cfg]
 
             [clojure.java.browse :refer [browse-url]]))
 
 
+(def test-data (into [] (for [i (range 0 20)] {:year (+ 2000 i) :income (+ 10 i)})))
 
 (defn prepare-tmp-dir
   "Prepares a tmp directory with all templates and returns a path to it"
@@ -31,3 +33,13 @@
     path
     ;; (browse-url (str "file://" index))
     ))
+
+(comment
+  (cfg/make-chart-config
+   {:id          "line"
+    :x           "year"
+    :y           "income"
+    :x-order     "year"
+    :series-type "line"
+    :data        test-data
+    }))

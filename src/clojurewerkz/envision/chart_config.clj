@@ -1,7 +1,8 @@
-(ns clojurewerkz.envision.chart-config)
+(ns clojurewerkz.envision.chart-config
+  (:require [schema.core                        :as s]))
 
 (s/defrecord ChartConfig
-    [^{:s s/String}  id
+    [^{:s s/Str}  id
 
      ^{:s s/Int}     width
      ^{:s s/Int}     height
