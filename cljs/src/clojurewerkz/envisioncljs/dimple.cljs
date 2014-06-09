@@ -59,8 +59,10 @@
   chart)
 
 (defn add-series
-  [chart series chart-type]
-  (.addSeries chart series chart-type)
+  [chart series chart-type & {:keys [interpolation]}]
+  (let [series (.addSeries chart series chart-type)]
+    (when interpolation
+      (set! (.-interpolation series) interpolation)))
   chart)
 
 (defn draw
