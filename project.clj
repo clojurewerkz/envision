@@ -9,4 +9,5 @@
                  [enlive                   "1.1.5"]
                  [me.raynes/fs             "1.4.4"]
                  [cheshire                 "5.3.1"]
+                 [prismatic/schema         "0.2.2"]
                  [clojurewerkz/statistiker "0.1.0-SNAPSHOT"]])
