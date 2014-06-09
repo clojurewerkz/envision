@@ -39,13 +39,28 @@
   (configure-axis
    (.addCategoryAxis chart axis-name field-name)
    axis-config)
-
   chart)
 
 (defn add-measure-axis
   [chart axis-name field-name]
   (.addMeasureAxis chart axis-name field-name)
   chart)
+
+(defrecord AxisTypeConstructor
+    [^{:s s/Any} category
+     ^{:s s/Any} measure])
+
+(def axis-type-constructors
+  (->AxisTypeConstructor add-category-axis
+                         add-measure-axis))
+
+(defn add-axis
+  [chart axis-type & args]
+  (let [c (sm/safe-get axis-type-constructors
+                       axis-type)]
+    (apply c chart args)))
+
+
 
 (defn set-data
   [chart data]

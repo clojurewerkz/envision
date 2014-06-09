@@ -40,11 +40,11 @@
                                 :chart  chart)))
 
     (-> chart
-        (dimple/set-data          data)
-        (dimple/add-category-axis "x" (sm/safe-get line-chart-config :x) :order-rule "Date")
-        (dimple/add-measure-axis  "y" (sm/safe-get line-chart-config :y))
-        (dimple/add-series        nil dimple/line :interpolation "cardinal")
-        (dimple/set-bounds        bound-x bound-y (- width (* 2 bound-x)) (- height (* 3 bound-y)))
+        (dimple/set-data     data)
+        (dimple/add-axis     :category "x" (sm/safe-get line-chart-config :x) :order-rule "Date")
+        (dimple/add-axis     :measure "y" (sm/safe-get line-chart-config :y))
+        (dimple/add-series   nil dimple/line :interpolation "cardinal")
+        (dimple/set-bounds   bound-x bound-y (- width (* 2 bound-x)) (- height (* 3 bound-y)))
         (dimple/draw))
     ))
 
