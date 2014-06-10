@@ -79,7 +79,7 @@ http://localhost:4000/templates/index.html
 
 And see the resulting graphs: 
 
-![Preview](https://www.evernote.com/shard/s9/sh/985ec7c9-3ee8-42a7-8078-839ce7631ec0/a9d2f8cc5ad717717dc24f2946c04044)
+![Preview](https://www.evernote.com/shard/s9/sh/985ec7c9-3ee8-42a7-8078-839ce7631ec0/a9d2f8cc5ad717717dc24f2946c04044/res/5d96d756-c68f-4527-8585-d6032f761ad9/skitch.png?resizeSmall&width=300)
 
 We decided to use Jekyll, since sometimes `d3` doesn't like `file://` protocol. However, you can just 
 open open `templates/index_file.html` in your browser and get pretty much same result.
