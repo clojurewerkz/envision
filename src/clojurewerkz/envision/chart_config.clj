@@ -17,6 +17,7 @@
 
      ^{:s s/Str}     x-order
      ^{:s s/Keyword} series-type
+     ^{:s s/Any}     series ;; actually it's either string or vector of strings?
      ^{:s s/Keyword} interpolation
 
      ^{:s s/Any} data])
@@ -37,6 +38,7 @@
 
            x-order
            series-type
+           series
            interpolation
 
            data]
@@ -66,6 +68,7 @@
 
                  x-order
                  series-type
+                 series
                  interpolation
 
                  data

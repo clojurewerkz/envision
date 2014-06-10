@@ -41,7 +41,7 @@
 
         (dimple/add-axis     :measure "y" (sm/safe-get line-chart-config :y))
 
-        (dimple/add-series   nil
+        (dimple/add-series   (sm/safe-get line-chart-config :series)
                              (sm/safe-get line-chart-config :series-type)
                              :interpolation (sm/safe-get line-chart-config :interpolation))
         (dimple/set-bounds   (sm/safe-get line-chart-config :top-x)

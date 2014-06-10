@@ -19,6 +19,7 @@
 
      ^{:s s/Str}     x-order
      ^{:s s/Keyword} series-type
+     ^{:s s/Keyword} series
      ^{:s s/Keyword} interpolation
 
      ^{:s s/Any} data])
@@ -39,6 +40,7 @@
 
            x-order
            series-type
+           series
            interpolation
 
            data]
@@ -68,6 +70,7 @@
 
                  x-order
                  (keyword series-type)
+                 series
                  (keyword interpolation)
 
                  (clj->js data)
