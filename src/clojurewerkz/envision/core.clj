@@ -5,6 +5,7 @@
             [schema.core                        :as s]
             [clojurewerkz.envision.chart-config :as cfg]
 
+            [clojurewerkz.statistiker.histograms :as hist]
             [clojure.java.browse :refer [browse-url]]))
 
 
@@ -31,3 +32,16 @@
     path
     ;; (browse-url (str "file://" index))
     ))
+
+(defn histogram
+  "Histogram accepts a vector of values"
+  [bins data]
+  (let [hist (->> (hist/empirical-distribution bins data)
+                  (map (fn [[x y]] {:x x :y y})))]
+    (prepare-tmp-dir
+     [(cfg/make-chart-config
+       {:id            "histogram"
+        :x             "x"
+        :y             "y"
+        :series-type   "bar"
+        :data          hist})])))
