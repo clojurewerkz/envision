@@ -65,7 +65,7 @@ let's generate some data and render a line and area charts:
 (ns my-ns
   (:require [clojurewerkz.envision.core         :as envision]
             [clojurewerkz.envision.chart-config :as cfg]
-  
+
 (envision/prepare-tmp-dir
  [(cfg/make-chart-config
    {:id            "line"
@@ -73,7 +73,15 @@ let's generate some data and render a line and area charts:
     :y             "income"
     :x-order       "year"
     :series-type   "line"
-    :data          (into [] (for [i (range 0 20)] {:year (+ 2000 i) :income (+ 10 i (rand-int 10))}))
+    :data          (flatten (for [i (range 0 20)]
+                              [{:year (+ 2000 i)
+                                 :income (+ 10 i (rand-int 10))
+                                 :series "series-1"}
+                                {:year (+ 2000 i)
+                                 :income (+ 10 i (rand-int 20))
+                                 :series "series-2"}]
+                              ))
+    :series        "series"
     :interpolation :cardinal
     })
   (cfg/make-chart-config
@@ -110,7 +118,7 @@ http://localhost:4000/templates/index.html
 
 And see the resulting graphs: 
 
-![Preview](https://www.evernote.com/shard/s9/sh/985ec7c9-3ee8-42a7-8078-839ce7631ec0/a9d2f8cc5ad717717dc24f2946c04044/res/5d96d756-c68f-4527-8585-d6032f761ad9/skitch.png?resizeSmall&width=300)
+![Preview](https://www.evernote.com/shard/s9/sh/b5f9b88c-388b-49f0-bdab-c4b3a4672e6e/9ec30e428b7887932c669bf08dbdc468/res/00bb2677-6134-4254-adf2-c68a3ed7f2d7/skitch.png?resizeSmall&width=300)
 
 We decided to use Jekyll, since sometimes `d3` doesn't like `file://` protocol. However, you can just 
 open open `templates/index_file.html` in your browser and get pretty much same result.
@@ -126,6 +134,15 @@ In order to configure chart, you have to specify:
   * `series-type`, one of `line`, `bubble`, `area` and `bar` for line charts, Scatterplots, 
      area charts and barcharts, correspondingly     
 
+Optionally, you can specify: 
+
+  * `series`, which will split your data, grouping or color-coding charts by given keys
+    keys should be given either as a string or a vector or strings.
+  * `interpolation`, interpolation type to be used in area or line chart, usually you want
+    to use `linear`, `basis`, or `step-after`, but there're more options, which will be
+    mentioned in a corresponding section.
+  * `x-order` specifies a key to sort data points on `x` axis, if it's not `x` 
+  
 ## Planned Features:
 
  * Histograms
