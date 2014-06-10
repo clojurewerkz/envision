@@ -102,12 +102,10 @@ Function will return a tmp folder path, like:
 /var/folders/1y/xr7zvp2j035bpq09whg7th5w0000gn/T/envision-1402385765815-3502705781
 ```
 
-`cd` into this path and start Jekyll (if you don't line using Jekyll, don't have Ruby installed or don't like
-it, just open `templates/index_file.html` static file in your browser.
+`cd` into this path and start an HTTP Server on most systems you'd have Python 2.7 installed.
 
 ```
-bundle install
-jekyll serve --watch
+python -m SimpleHTTPServer
 ```
 
 After that you can point your browser to 
@@ -116,12 +114,15 @@ After that you can point your browser to
 http://localhost:4000/templates/index.html
 ```
 
+If you don't want to start an HTTP server, or don't have Python installed, just open `templates/index_file.html` 
+static file in your browser.
+
 And see the resulting graphs: 
 
 ![Preview](https://www.evernote.com/shard/s9/sh/b5f9b88c-388b-49f0-bdab-c4b3a4672e6e/9ec30e428b7887932c669bf08dbdc468/res/00bb2677-6134-4254-adf2-c68a3ed7f2d7/skitch.png?resizeSmall&width=300)
 
-We decided to use Jekyll, since sometimes `d3` doesn't like `file://` protocol. However, you can just 
-open open `templates/index_file.html` in your browser and get pretty much same result.
+We decided to use an simple HTTP server by default, since sometimes `d3` doesn't like `file://` protocol. However, 
+you can always just open `templates/index_file.html` in your browser and get pretty much same result.
 
 ## Chart configuration
 
