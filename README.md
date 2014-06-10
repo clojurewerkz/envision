@@ -185,4 +185,5 @@ Development sponsored by [codecentric AG](http://codecentric.de)
 
 ![Development Sponsored](https://www.codecentric.de/wp-content/themes/ccHomepage/img/logo-codecentric.png)
 
-LibSVM sources belong to their respected owners, except for the changes our team made to the source code.
+[dimple](http://dimplejs.org/), [d3](http://d3js.org) and [Twitter Bootstrap](http://getbootstrap.com/) sources 
+belong to their respective owners and are lincensed on different terms, not contradicting to library license.
