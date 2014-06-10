@@ -11,6 +11,36 @@ production (e.g. it will never be something user-facing), and is intended to be
 used by people who'd like to yield some information from their data, it should 
 be stable enough from the very early releases.
 
+## Dependency Information (Artifacts)
+
+Envision artifacts are [released to Clojars](https://clojars.org/clojurewerkz/envision). If you are using Maven, add the following repository
+definition to your `pom.xml`:
+
+```xml
+<repository>
+  <id>clojars.org</id>
+  <url>http://clojars.org/repo</url>
+</repository>
+```
+
+### The Most Recent Version
+
+With Leiningen:
+
+``` clojure
+[clojurewerkz/envision "0.1.0-SNAPSHOT"]
+```
+
+With Maven:
+
+``` xml
+<dependency>
+  <groupId>clojurewerkz</groupId>
+  <artifactId>envision</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+</dependency>
+```
+
 ## General Approach
 
 Main idea of this library is to make exploratory analysis more interactive and visual,
@@ -94,40 +124,9 @@ In order to configure chart, you have to specify:
   * `x`, key that should be taken as `x` value for each rendered point
   * `y`, key that should be taken as `y` value for each rendered point
   * `series-type`, one of `line`, `bubble`, `area` and `bar` for line charts, Scatterplots, 
-     area charts and barcharts, correspondingly
-     
-## Dependency Information (Artifacts)
+     area charts and barcharts, correspondingly     
 
-Envision artifacts are [released to Clojars](https://clojars.org/clojurewerkz/envision). If you are using Maven, add the following repository
-definition to your `pom.xml`:
-
-```xml
-<repository>
-  <id>clojars.org</id>
-  <url>http://clojars.org/repo</url>
-</repository>
-```
-
-### The Most Recent Version
-
-With Leiningen:
-
-``` clojure
-[clojurewerkz/envision "0.1.0-SNAPSHOT"]
-```
-
-With Maven:
-
-``` xml
-<dependency>
-  <groupId>clojurewerkz</groupId>
-  <artifactId>envision</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
-</dependency>
-```
-
-
-## Supported Features
+## Planned Features:
 
  * Histograms
  * Scatterplots
@@ -152,14 +151,6 @@ To subscribe for announcements of releases, important changes and so on, please 
 Envision is part of the [group of libraries known as ClojureWerkz](http://clojurewerkz.org), together with
 [Monger](http://clojuremongodb.info), [Elastisch](http://clojureelasticsearch.info), [Langohr](http://clojurerabbitmq.info),
 [Welle](http://clojureriak.info), [Titanium](http://titanium.clojurewerkz.org) and several others.
-
-
-
-## Continuous Integration
-
-[![Continuous Integration status](https://secure.travis-ci.org/clojurewerkz/envision.png)](http://travis-ci.org/clojurewerkz/envision)
-
-CI is hosted by [travis-ci.org](http://travis-ci.org)
 
 ## Development
 
