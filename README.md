@@ -25,6 +25,76 @@ minimum, which is already helpful by default through the API and let you configu
 everything you could've possibly imagined yourself: adding interactivity, combining
 charts, customizing layouts and so on.
 
+## Usage
+
+Main entrypoint is `clojurewerkz.envision.core/prepare-tmp-dir`. It creates a temporary
+directory with all the required dependencies and returns you a path to it. For example,
+let's generate some data and render a line and area charts:
+
+```clj
+(ns my-ns
+  (:require [clojurewerkz.envision.core         :as envision]
+            [clojurewerkz.envision.chart-config :as cfg]
+  
+(envision/prepare-tmp-dir
+ [(cfg/make-chart-config
+   {:id            "line"
+    :x             "year"
+    :y             "income"
+    :x-order       "year"
+    :series-type   "line"
+    :data          (into [] (for [i (range 0 20)] {:year (+ 2000 i) :income (+ 10 i (rand-int 10))}))
+    :interpolation :cardinal
+    })
+  (cfg/make-chart-config
+   {:id            "line2"
+    :x             "year"
+    :y             "income"
+    :x-order       "year"
+    :series-type   "area"
+    :data          (into [] (for [i (range 0 20)] {:year (+ 2000 i) :income (+ 10 i (rand-int 10))}))
+    :interpolation :cardinal
+    })
+   ])
+```
+
+Function will return a tmp folder path, like: 
+
+```
+/var/folders/1y/xr7zvp2j035bpq09whg7th5w0000gn/T/envision-1402385765815-3502705781
+```
+
+`cd` into this path and start Jekyll:
+
+```
+bundle install
+jekyll serve --watch
+```
+
+After that you can point your browser to 
+
+```
+http://localhost:4000/templates/index.html
+```
+
+And see the resulting graphs: 
+
+![Preview](https://www.evernote.com/shard/s9/sh/985ec7c9-3ee8-42a7-8078-839ce7631ec0/a9d2f8cc5ad717717dc24f2946c04044)
+
+We decided to use Jekyll, since sometimes `d3` doesn't like `file://` protocol. However, you can just 
+open open `templates/index_file.html` in your browser and get pretty much same result.
+
+## Chart configuration
+
+In order to configure chart, you have to specify:
+
+  * `id`, a unique string literal identifying the chart
+  * `data`, sequence of maps, where each map represents an entry to be displayed
+  * `x`, key that should be taken as `x` value for each rendered point
+  * `y`, key that should be taken as `y` value for each rendered point
+  * `series-type`, one of `line`, `bubble`, `area` and `bar` for line charts, Scatterplots, 
+     area charts and barcharts, correspondingly
+     
 ## Dependency Information (Artifacts)
 
 Envision artifacts are [released to Clojars](https://clojars.org/clojurewerkz/envision). If you are using Maven, add the following repository
