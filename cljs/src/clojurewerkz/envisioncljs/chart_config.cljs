@@ -1,4 +1,4 @@
-(ns clojurewerkz.envisioncljs.line_chart
+(ns clojurewerkz.envisioncljs.chart_config
   (:require-macros [schema.macros :as sm])
   (:require [schema.core             :as s]))
 
@@ -53,7 +53,6 @@
          chart-height  250
 
          series-type   :line}}]
-
   (->ChartConfig id
 
                  width
@@ -68,8 +67,8 @@
                  z
 
                  x-order
-                 series-type
-                 interpolation
+                 (keyword series-type)
+                 (keyword interpolation)
 
-                 data
+                 (clj->js data)
                  ))

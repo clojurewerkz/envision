@@ -4,14 +4,11 @@
             [clojure.set             :as set]
             [schema.core             :as s]
 
-            [clojurewerkz.envisioncljs.dimple :as dimple]
-            [clojurewerkz.envisioncljs.utils  :as u]))
+            [clojurewerkz.envisioncljs.chart_config :as cfg]
+            [clojurewerkz.envisioncljs.dimple       :as dimple]
+            [clojurewerkz.envisioncljs.utils        :as u]))
 
 (enable-console-print!)
-
-(sm/defrecord LineChartConfig
-    [^{:s s/Str} x
-     ^{:s s/Str} y])
 
 (sm/defrecord LineChartState
     [^{:s s/Any}                 chart
@@ -26,49 +23,56 @@
   (LineChartState. nil false))
 
 (defn- init-line-chart
-  [this line-chart-config line-chart-state data]
-  (let [width   620
-        height  350
-        bound-x 60
-        bound-y 30
-
-        chart   (dimple/make-chart (u/dom-node this) width height)]
+  [this line-chart-config line-chart-state]
+  (let [chart   (dimple/make-chart (u/dom-node this)
+                                   (sm/safe-get line-chart-config :width)
+                                   (sm/safe-get line-chart-config :height)
+                                   )]
 
     (validate-line-chart-state
      (swap! line-chart-state #(assoc %
-                                :chart  chart)))
+                                :chart chart)))
 
     (-> chart
-        (dimple/set-data     data)
-        (dimple/add-axis     :category "x" (sm/safe-get line-chart-config :x) :order-rule "Date")
+        (dimple/set-data     (sm/safe-get line-chart-config :data))
+        (dimple/add-axis     :category "x"
+                             (sm/safe-get line-chart-config :x)
+                             :order-rule (sm/safe-get line-chart-config :x-order))
+
         (dimple/add-axis     :measure "y" (sm/safe-get line-chart-config :y))
-        (dimple/add-series   nil :line :interpolation :cardinal)
-        (dimple/set-bounds   bound-x bound-y (- width (* 2 bound-x)) (- height (* 3 bound-y)))
+
+        (dimple/add-series   nil
+                             (sm/safe-get line-chart-config :series-type)
+                             :interpolation (sm/safe-get line-chart-config :interpolation))
+        (dimple/set-bounds   (sm/safe-get line-chart-config :top-x)
+                             (sm/safe-get line-chart-config :top-y)
+                             (sm/safe-get line-chart-config :chart-width)
+                             (sm/safe-get line-chart-config :chart-height)
+                             )
         (dimple/draw))
     ))
 
 (defn line-chart
-  [line-chart-config line-chart-state data]
+  [line-chart-config line-chart-state]
   (with-meta (fn []
                (let [a @line-chart-state]
                  [:div {:class "envision-chart"
-                        :key   "envision-line-chart"} ""]))
+                        :key   (sm/safe-get line-chart-config :id)} ""]))
     {:component-did-mount (fn [this]
                             (init-line-chart this
                                              line-chart-config
                                              line-chart-state
-                                             data))}))
+                                             ))}))
 
 (defn line-chart-app
   []
   (fn []
-    [:div
-     (let [data (js->clj js/renderData :keywordize-keys true)]
-      (println (first (first (first data))))
+    (let [data (js->clj js/renderData :keywordize-keys true)]
       [:div
-       [(line-chart
-         (->LineChartConfig "Month" "Unit Sales")
-         (atom (make-empty-line-chart-state))
-         js/renderData)]])]))
+       (for [config data]
+         [(line-chart
+           (cfg/make-chart-config config)
+           (atom (make-empty-line-chart-state))
+           )])])))
 
 (reagent/render-component [line-chart-app] (.getElementById js/document "app"))

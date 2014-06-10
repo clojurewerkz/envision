@@ -8,8 +8,6 @@
             [clojure.java.browse :refer [browse-url]]))
 
 
-(def test-data (into [] (for [i (range 0 20)] {:year (+ 2000 i) :income (+ 10 i)})))
-
 (defn prepare-tmp-dir
   "Prepares a tmp directory with all templates and returns a path to it"
   [data]
@@ -33,14 +31,3 @@
     path
     ;; (browse-url (str "file://" index))
     ))
-
-(comment
-  (prepare-tmp-dir
-   [(cfg/make-chart-config
-     {:id          "line"
-      :x           "year"
-      :y           "income"
-      :x-order     "year"
-      :series-type "line"
-      :data        test-data
-      })]))
