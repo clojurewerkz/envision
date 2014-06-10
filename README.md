@@ -64,7 +64,8 @@ Function will return a tmp folder path, like:
 /var/folders/1y/xr7zvp2j035bpq09whg7th5w0000gn/T/envision-1402385765815-3502705781
 ```
 
-`cd` into this path and start Jekyll:
+`cd` into this path and start Jekyll (if you don't line using Jekyll, don't have Ruby installed or don't like
+it, just open `templates/index_file.html` static file in your browser.
 
 ```
 bundle install
