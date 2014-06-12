@@ -12,7 +12,9 @@
      ^{:s s/Int}     chart-height
 
      ^{:s s/Str}     x
+     ^{:s s/Str}     x-type
      ^{:s s/Str}     y
+     ^{:s s/Str}     y-type
      ^{:s s/Str}     z
 
      ^{:s s/Str}     x-order
@@ -20,7 +22,8 @@
      ^{:s s/Any}     series ;; actually it's either string or vector of strings?
      ^{:s s/Keyword} interpolation
 
-     ^{:s s/Any} data])
+     ^{:s s/Any}     data
+     ^{:s s/Any}     additional-series])
 
 (defn make-chart-config
   [{:keys [id
@@ -33,7 +36,9 @@
            chart-height
 
            x
+           x-type
            y
+           y-type
            z
 
            x-order
@@ -41,7 +46,8 @@
            series
            interpolation
 
-           data]
+           data
+           additional-series]
     :or {id            "chart"
 
          width         620
@@ -63,7 +69,9 @@
                  chart-height
 
                  x
+                 x-type
                  y
+                 y-type
                  z
 
                  x-order
@@ -72,4 +80,4 @@
                  interpolation
 
                  data
-                 ))
+                 additional-series))

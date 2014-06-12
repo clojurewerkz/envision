@@ -35,15 +35,27 @@
 
     (-> chart
         (dimple/set-data     (sm/safe-get line-chart-config :data))
-        (dimple/add-axis     :category "x"
+        (dimple/add-axis     (sm/safe-get line-chart-config :x-type)
+                             "x"
                              (sm/safe-get line-chart-config :x)
                              :order-rule (sm/safe-get line-chart-config :x-order))
 
-        (dimple/add-axis     :measure "y" (sm/safe-get line-chart-config :y))
+        (dimple/add-axis     (sm/safe-get line-chart-config :y-type)
+                             "y" (sm/safe-get line-chart-config :y))
 
         (dimple/add-series   (sm/safe-get line-chart-config :series)
                              (sm/safe-get line-chart-config :series-type)
-                             :interpolation (sm/safe-get line-chart-config :interpolation))
+                             {:interpolation (sm/safe-get line-chart-config :interpolation)})
+
+        ((fn [chart]
+           (when-let [additional-series (sm/safe-get line-chart-config :additional-series)]
+             (doseq [[type config] (partition 2 additional-series)]
+               (dimple/add-series chart
+                                  (.-categoryFields (first (.-series chart)))
+                                  (keyword type)
+                                  config)
+               ))
+           chart))
         (dimple/set-bounds   (sm/safe-get line-chart-config :top-x)
                              (sm/safe-get line-chart-config :top-y)
                              (sm/safe-get line-chart-config :chart-width)

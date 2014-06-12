@@ -2,7 +2,6 @@
   (:require-macros [schema.macros :as sm])
   (:require [schema.core             :as s]))
 
-
 (sm/defrecord ChartConfig
     [^{:s s/String}  id
 
@@ -14,7 +13,9 @@
      ^{:s s/Int}     chart-height
 
      ^{:s s/Str}     x
+     ^{:s s/Str}     x-type
      ^{:s s/Str}     y
+     ^{:s s/Str}     y-type
      ^{:s s/Str}     z
 
      ^{:s s/Str}     x-order
@@ -22,7 +23,8 @@
      ^{:s s/Keyword} series
      ^{:s s/Keyword} interpolation
 
-     ^{:s s/Any} data])
+     ^{:s s/Any}     data
+     ^{:s s/Any}     additional-series])
 
 (defn make-chart-config
   [{:keys [id
@@ -35,7 +37,9 @@
            chart-height
 
            x
+           x-type
            y
+           y-type
            z
 
            x-order
@@ -43,7 +47,8 @@
            series
            interpolation
 
-           data]
+           data
+           additional-series]
 
     :or {id            "chart"
 
@@ -65,7 +70,9 @@
                  chart-height
 
                  x
+                 (or (keyword x-type) :category)
                  y
+                 (or (keyword y-type) :measure)
                  z
 
                  x-order
@@ -74,4 +81,4 @@
                  (keyword interpolation)
 
                  (clj->js data)
-                 ))
+                 additional-series))

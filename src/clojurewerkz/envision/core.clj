@@ -16,19 +16,17 @@
         path     (.getPath temp-dir)
         index    (str path "/index.html")]
     (doseq [dir ["assets"
-                 "_site"
                  "templates"]]
       (fs/copy-dir (clojure.java.io/resource dir) temp-dir))
 
+    (fs/copy-dir (clojure.java.io/resource "src")
+                 (io/file (str path "/cljs/src" )))
 
-    (doseq [file ["Gemfile"
-                  "Gemfile.lock"]]
-      (fs/copy (clojure.java.io/resource file) (str path "/" file)))
+    (fs/copy (clojure.java.io/resource "template.project.clj")
+             (str path "/cljs/project.clj"))
 
-    (fs/copy-dir (clojure.java.io/resource "src") (io/file (str path "/cljs/src" )))
-    (fs/copy (clojure.java.io/resource "template.project.clj") (str path "/cljs/project.clj"))
-
-    (spit (str path "/assets/data/data.js") (str "var renderData = "(json/generate-string data) ";"))
+    (spit (str path "/assets/data/data.js")
+          (str "var renderData = "(json/generate-string data) ";"))
     path
     ;; (browse-url (str "file://" index))
     ))
@@ -45,3 +43,31 @@
         :y             "y"
         :series-type   "bar"
         :data          hist})])))
+
+(defn linear-regression
+  [_]
+  (prepare-tmp-dir
+   [(cfg/make-chart-config
+     {:id                "bubble"
+      :x                 "year"
+      :y                 "income"
+      :x-order           "year"
+      :series-type       "bubble"
+      :data              (flatten (for [i (range 0 20)]
+                                    [{:year (+ 2000 i)
+                                      :income (+ 10 i (rand-int 10))
+                                      :series "series-1"}
+                                     {:year (+ 2000 i)
+                                      :income (+ 10 i (rand-int 20))
+                                      :series "series-2"}]
+                                    ))
+      :series            ["year" "income" "series"]
+      :interpolation     :cardinal
+      :additional-series [:linear-trend {:data [{:cx 2000 :cy 10},
+                                                {:cx 2019 :cy 50}]}]
+      ;; Additional series?..
+      ;; (dimple/add-series   ["year" "series"]
+      ;;                        :linear-trend
+      ;;                        )
+      })
+    ]))

@@ -54,18 +54,47 @@
     [^{:s s/Any} line
      ^{:s s/Any} bubble
      ^{:s s/Any} area
-     ^{:s s/Any} bar])
+     ^{:s s/Any} bar
+     ^{:s s/Any} linear-trend])
 
 (def line   (-> js/dimple .-plot .-line))
 (def bubble (-> js/dimple .-plot .-bubble))
 (def area   (-> js/dimple .-plot .-area))
 (def bar    (-> js/dimple .-plot .-bar))
 
+
+(def linear-trend (clj->js {:stacked       false
+                            :grouped       false
+                            :supportedAxes (clj->js ["x" "y"])
+
+                            :draw          (fn [chart series duration]
+                                             (println (.-data series))
+                                             (let [line (-> js/d3
+                                                            (.-svg)
+                                                            (.line)
+                                                            (.x (fn [d]
+                                                                  (-> js/dimple
+                                                                      .-_helpers
+                                                                      (.cx d chart series))))
+                                                            (.y (fn [d]
+                                                                  (-> js/dimple
+                                                                      .-_helpers
+                                                                      (.cy d chart series)))))]
+                                               (-> (.-svg chart)
+                                                   (.append "g")
+                                                   (.append "path")
+                                                   (.attr "d"
+                                                          (line (.-data series)))
+                                                   (.style "stroke" "blue"))))}))
+
+;; (def linear-trend    (-> js/dimple .-plot .-linearTrend))
+
 (def series-type-constructors
   (->SeriesTypeConstructor line
                            bubble
                            area
-                           bar))
+                           bar
+                           linear-trend))
 ;;
 ;; Configuration
 ;;
@@ -116,13 +145,17 @@
   chart)
 
 (defn add-series
-  [chart series-literals series-type & {:keys [interpolation]}]
+  [chart series-literals series-type {:keys [interpolation data] :as cfg}]
   (let [series (.addSeries chart
-                           series-literals
+                           (clj->js series-literals)
                            (sm/safe-get series-type-constructors
                                         series-type))]
+
     (when interpolation
-      (set! (.-interpolation series) (sm/safe-get interpolations interpolation))))
+      (set! (.-interpolation series) (sm/safe-get interpolations interpolation)))
+
+    (when data
+      (set! (.-data series) (clj->js data))))
   chart)
 
 (defn draw
