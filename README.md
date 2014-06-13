@@ -2,7 +2,9 @@
 
 Envision is a small, easy to use Clojure library for data processing, cleanup
 and visualisation. If you've heard about Incanter, you may see a couple of things
-that we do in a similar way.
+that we do in a similar way. 
+
+You can check out a couple of rendered examples [here](http://coffeenco.de/articles/envision/templates/index_file.html).
 
 ## Project Maturity
 
@@ -67,33 +69,50 @@ let's generate some data and render a line and area charts:
             [clojurewerkz.envision.chart-config :as cfg]
 
 (envision/prepare-tmp-dir
- [(cfg/make-chart-config
-   {:id            "line"
-    :x             "year"
-    :y             "income"
-    :x-config      {:order-rule "year"}
-    :series-type   "line"
-    :data          (flatten (for [i (range 0 20)]
-                              [{:year (+ 2000 i)
-                                 :income (+ 10 i (rand-int 10))
-                                 :series "series-1"}
-                                {:year (+ 2000 i)
-                                 :income (+ 10 i (rand-int 20))
-                                 :series "series-2"}]
-                              ))
-    :series        "series"
-    :interpolation :cardinal
-    })
-  (cfg/make-chart-config
-   {:id            "line2"
-    :x             "year"
-    :y             "income"
-    :x-config      {:order-rule "year"}
-    :series-type   "area"
-    :data          (into [] (for [i (range 0 20)] {:year (+ 2000 i) :income (+ 10 i (rand-int 10))}))
-    :interpolation :cardinal
-    })
-   ])
+   [(envision/histogram 10 (take 100 (distribution/normal-distribution 5 10))
+               {:tick-format "s"})
+
+    (envision/linear-regression
+     (flatten (for [i (range 0 20)]
+                [{:year (+ 2000 i)
+                  :income (+ 10 i (rand-int 10))
+                  :series "series-1"}
+                 {:year (+ 2000 i)
+                  :income (+ 10 i (rand-int 20))
+                  :series "series-2"}]
+                ))
+     :year
+     :income
+     [:year :income :series])
+    (cfg/make-chart-config
+     {:id            "line"
+      :headline      "Line Chart"
+      :x             "year"
+      :y             "income"
+      :x-config      {:order-rule "year"}
+      :series-type   "line"
+      :data          (flatten (for [i (range 0 20)]
+                                [{:year (+ 2000 i)
+                                  :income (+ 10 i (rand-int 10))
+                                  :series "series-1"}
+                                 {:year (+ 2000 i)
+                                  :income (+ 10 i (rand-int 20))
+                                  :series "series-2"}]
+                                ))
+      :series        "series"
+      :interpolation :cardinal
+      })
+    (cfg/make-chart-config
+     {:id            "area"
+      :headline      "Area Chart"
+      :x             "year"
+      :y             "income"
+      :x-config      {:order-rule "year"}
+      :series-type   "area"
+      :data          (into [] (for [i (range 0 20)] {:year (+ 2000 i) :income (+ 10 i (rand-int 10))}))
+      :interpolation :cardinal
+      })
+    ])
 ```
 
 Function will return a tmp folder path, like: 
@@ -117,9 +136,7 @@ http://localhost:4000/templates/index.html
 If you don't want to start an HTTP server, or don't have Python installed, just open `templates/index_file.html` 
 static file in your browser.
 
-And see the resulting graphs: 
-
-![Preview](https://www.evernote.com/shard/s9/sh/b5f9b88c-388b-49f0-bdab-c4b3a4672e6e/9ec30e428b7887932c669bf08dbdc468/res/00bb2677-6134-4254-adf2-c68a3ed7f2d7/skitch.png?resizeSmall&width=300)
+You can check out a couple of example graphs rendered as static files [here](http://coffeenco.de/articles/envision/templates/index_file.html).
 
 We decided to use an simple HTTP server by default, since sometimes `d3` doesn't like `file://` protocol. However, 
 you can always just open `templates/index_file.html` in your browser and get pretty much same result.
@@ -148,15 +165,14 @@ Optionally, you can specify:
   * `order-rule` specifies a key to sort data points on `x` axis, if it's not `x` 
   * `override-min` overrides minimum for an axis
   
-## Planned Features:
+## Features:
 
- * Histograms
+ * Histograms 
  * Scatterplots
  * Boxplots
  * Barcharts
  * Regression lines
  * Cluster visualisation
-
 
 ## Supported Clojure Versions
 
