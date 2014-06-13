@@ -6,6 +6,7 @@
             [clojurewerkz.envision.chart-config :as cfg]
 
             [clojurewerkz.statistiker.histograms :as hist]
+            [clojurewerkz.statistiker.regression :as regression]
             [clojure.java.browse :refer [browse-url]]))
 
 
@@ -45,25 +46,40 @@
         :data          hist})])))
 
 (defn linear-regression
-  [_]
-  (prepare-tmp-dir
-   [(cfg/make-chart-config
-     {:id                "bubble"
-      :x                 "year"
-      :y                 "income"
-      :x-order           "year"
-      :series-type       "bubble"
-      :data              (flatten (for [i (range 0 20)]
-                                    [{:year (+ 2000 i)
-                                      :income (+ 10 i (rand-int 10))
-                                      :series "series-1"}
-                                     {:year (+ 2000 i)
-                                      :income (+ 10 i (rand-int 20))
-                                      :series "series-2"}]
-                                    ))
-      :series            ["year" "income" "series"]
-      :interpolation     :cardinal
-      :additional-series [:linear-trend {:data [{:cx 2000 :cy 10},
-                                                {:cx 2019 :cy 50}]}]
-      })
-    ]))
+  [data x-field y-field series]
+  (let [d             (map x-field data)
+        [min-x max-x] [(apply min d) (apply max d)]]
+    (prepare-tmp-dir
+     [(cfg/make-chart-config
+       {:id                "bubble"
+        :x                 x-field
+        :x-type            :measure
+        :y                 y-field
+        :y-type            :measure
+        :x-config          {:order-rule "year"
+                            :override-min min-x}
+        :series-type       "bubble"
+        :data              data
+        :series            series
+        :additional-series [:linear-trend {:data (let [{:keys [intercept slope]} (regression/linear-regression
+                                                                                  data x-field y-field)]
+
+                                                   [{:cx min-x :cy (+ intercept (* slope min-x))},
+                                                    {:cx max-x :cy (+ intercept (* slope max-x))}])}]
+        })
+      ])))
+
+
+(defn a []
+  (linear-regression
+   (flatten (for [i (range 0 20)]
+              [{:year (+ 2000 i)
+                :income (+ 10 i (rand-int 10))
+                :series "series-1"}
+               {:year (+ 2000 i)
+                :income (+ 10 i (rand-int 20))
+                :series "series-2"}]
+              ))
+   :year
+   :income
+   [:year :income :series]))

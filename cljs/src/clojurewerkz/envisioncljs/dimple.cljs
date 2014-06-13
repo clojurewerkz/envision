@@ -105,7 +105,10 @@
 ;;
 
 (defn configure-axis
-  [axis {:keys [order-rule tick-format]}]
+  [axis {:keys [order-rule tick-format override-min]}]
+  (when override-min
+    (set! (.-overrideMin axis) override-min))
+
   (when tick-format
     (set! (.-tickFormat axis) tick-format))
 
@@ -120,8 +123,10 @@
   chart)
 
 (defn add-measure-axis
-  [chart axis-name field-name]
-  (.addMeasureAxis chart axis-name field-name)
+  [chart axis-name field-name axis-config]
+  (configure-axis
+   (.addMeasureAxis chart axis-name field-name)
+   axis-config)
   chart)
 
 (defrecord AxisTypeConstructor

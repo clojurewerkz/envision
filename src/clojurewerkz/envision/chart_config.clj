@@ -17,7 +17,9 @@
      ^{:s s/Str}     y-type
      ^{:s s/Str}     z
 
-     ^{:s s/Str}     x-order
+     ^{:s s/Any}     x-config
+     ^{:s s/Any}     y-config
+
      ^{:s s/Keyword} series-type
      ^{:s s/Any}     series ;; actually it's either string or vector of strings?
      ^{:s s/Keyword} interpolation
@@ -41,7 +43,9 @@
            y-type
            z
 
-           x-order
+           x-config
+           y-config
+
            series-type
            series
            interpolation
@@ -74,7 +78,9 @@
                  y-type
                  z
 
-                 x-order
+                 x-config
+                 y-config
+
                  series-type
                  series
                  interpolation

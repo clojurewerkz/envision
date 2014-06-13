@@ -18,7 +18,9 @@
      ^{:s s/Str}     y-type
      ^{:s s/Str}     z
 
-     ^{:s s/Str}     x-order
+     ^{:s s/Any}     x-config
+     ^{:s s/Any}     y-config
+
      ^{:s s/Keyword} series-type
      ^{:s s/Keyword} series
      ^{:s s/Keyword} interpolation
@@ -42,7 +44,9 @@
            y-type
            z
 
-           x-order
+           x-config
+           x-config
+
            series-type
            series
            interpolation
@@ -75,7 +79,9 @@
                  (or (keyword y-type) :measure)
                  z
 
-                 x-order
+                 x-config
+                 y-config
+
                  (keyword series-type)
                  series
                  (keyword interpolation)
