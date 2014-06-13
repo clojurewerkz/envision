@@ -71,7 +71,7 @@ let's generate some data and render a line and area charts:
    {:id            "line"
     :x             "year"
     :y             "income"
-    :x-order       "year"
+    :x-config      {:order-rule "year"}
     :series-type   "line"
     :data          (flatten (for [i (range 0 20)]
                               [{:year (+ 2000 i)
@@ -88,7 +88,7 @@ let's generate some data and render a line and area charts:
    {:id            "line2"
     :x             "year"
     :y             "income"
-    :x-order       "year"
+    :x-config      {:order-rule "year"}
     :series-type   "area"
     :data          (into [] (for [i (range 0 20)] {:year (+ 2000 i) :income (+ 10 i (rand-int 10))}))
     :interpolation :cardinal
@@ -142,7 +142,11 @@ Optionally, you can specify:
   * `interpolation`, interpolation type to be used in area or line chart, usually you want
     to use `linear`, `basis`, or `step-after`, but there're more options, which will be
     mentioned in a corresponding section.
-  * `x-order` specifies a key to sort data points on `x` axis, if it's not `x` 
+  * `x-config` specifies a configuration for X axis
+  
+`x-config` options:
+  * `order-rule` specifies a key to sort data points on `x` axis, if it's not `x` 
+  * `override-min` overrides minimum for an axis
   
 ## Planned Features:
 
