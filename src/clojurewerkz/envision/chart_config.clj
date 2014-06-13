@@ -25,7 +25,9 @@
      ^{:s s/Keyword} interpolation
 
      ^{:s s/Any}     data
-     ^{:s s/Any}     additional-series])
+     ^{:s s/Any}     additional-series
+     ^{:s s/Str}     headline
+     ])
 
 (defn make-chart-config
   [{:keys [id
@@ -51,7 +53,8 @@
            interpolation
 
            data
-           additional-series]
+           additional-series
+           headline]
     :or {id            "chart"
 
          width         620
@@ -86,4 +89,5 @@
                  interpolation
 
                  data
-                 additional-series))
+                 additional-series
+                 headline))

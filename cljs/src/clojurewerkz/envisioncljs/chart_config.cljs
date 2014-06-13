@@ -2,6 +2,83 @@
   (:require-macros [schema.macros :as sm])
   (:require [schema.core             :as s]))
 
+(sm/defrecord AxisConfig
+    [^{:s s/Any} category-fields
+     ^{:s s/Any} colors
+     ^{:s s/Any} clamp
+     ^{:s s/Any} font-size
+     ^{:s s/Any} font-family
+     ^{:s s/Any} gridline-shapes
+     ^{:s s/Any} hidden
+     ^{:s s/Any} log-base
+     ^{:s s/Any} use-log
+     ^{:s s/Any} measure
+     ^{:s s/Any} override-min
+     ^{:s s/Any} show-gridlines
+     ^{:s s/Any} show-percent
+     ^{:s s/Any} title-shape
+     ^{:s s/Any} tick-format
+     ^{:s s/Any} time-field
+     ^{:s s/Any} title
+     ^{:s s/Any} floating-bar-width
+     ^{:s s/Any} date-parse-format
+     ^{:s s/Any} ticks
+     ^{:s s/Any} time-period
+     ^{:s s/Any} time-interval
+     ^{:s s/Any} order-rule
+     ^{:s s/Any} group-order-rule])
+
+(defn make-axis-config
+  [{:keys [category-fields
+           colors
+           clamp
+           font-size
+           font-family
+           gridline-shapes
+           hidden
+           log-base
+           use-log
+           measure
+           override-min
+           show-gridlines
+           show-percent
+           title-shape
+           tick-format
+           time-field
+           title
+           floating-bar-width
+           date-parse-format
+           ticks
+           time-period
+           time-interval
+           order-rule
+           group-order-rule]}]
+
+  (->AxisConfig category-fields
+                colors
+                clamp
+                font-size
+                font-family
+                gridline-shapes
+                hidden
+                log-base
+                use-log
+                measure
+                override-min
+                show-gridlines
+                show-percent
+                title-shape
+                tick-format
+                time-field
+                title
+                floating-bar-width
+                date-parse-format
+                ticks
+                time-period
+                time-interval
+                order-rule
+                group-order-rule))
+
 (sm/defrecord ChartConfig
     [^{:s s/String}  id
 
@@ -26,7 +103,8 @@
      ^{:s s/Keyword} interpolation
 
      ^{:s s/Any}     data
-     ^{:s s/Any}     additional-series])
+     ^{:s s/Any}     additional-series
+     ^{:s s/Str}     headline])
 
 (defn make-chart-config
   [{:keys [id
@@ -52,7 +130,8 @@
            interpolation
 
            data
-           additional-series]
+           additional-series
+           headline]
 
     :or {id            "chart"
 
@@ -79,12 +158,13 @@
                  (or (keyword y-type) :measure)
                  z
 
-                 x-config
-                 y-config
+                 (make-axis-config x-config)
+                 (make-axis-config y-config)
 
                  (keyword series-type)
                  series
                  (keyword interpolation)
 
                  (clj->js data)
-                 additional-series))
+                 additional-series
+                 headline))

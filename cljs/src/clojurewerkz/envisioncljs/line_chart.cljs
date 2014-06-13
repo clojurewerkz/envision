@@ -24,10 +24,10 @@
 
 (defn- init-line-chart
   [this line-chart-config line-chart-state]
-  (let [chart   (dimple/make-chart (u/dom-node this)
-                                   (sm/safe-get line-chart-config :width)
-                                   (sm/safe-get line-chart-config :height)
-                                   )]
+  (let [chart (dimple/make-chart (u/dom-node this)
+                                 (sm/safe-get line-chart-config :width)
+                                 (sm/safe-get line-chart-config :height)
+                                 )]
 
     (validate-line-chart-state
      (swap! line-chart-state #(assoc %
@@ -70,7 +70,10 @@
   (with-meta (fn []
                (let [a @line-chart-state]
                  [:div {:class "envision-chart"
-                        :key   (sm/safe-get line-chart-config :id)} ""]))
+                        :key   (sm/safe-get line-chart-config :id)}
+                  [:h1  (sm/safe-get line-chart-config :headline)]
+                  ]))
+    ;;
     {:component-did-mount (fn [this]
                             (init-line-chart this
                                              line-chart-config

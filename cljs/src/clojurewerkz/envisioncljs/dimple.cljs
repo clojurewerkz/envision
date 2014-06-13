@@ -2,7 +2,7 @@
   (:require-macros [schema.macros :as sm])
   (:require [schema.core             :as s]))
 
-(defrecord Interpolations
+(sm/defrecord Interpolations
     [^{:s s/Str} linear
      ^{:s s/Str} linear-closed
      ^{:s s/Str} step-before
@@ -50,7 +50,7 @@
 ;;
 ;;
 
-(defrecord SeriesTypeConstructor
+(sm/defrecord SeriesTypeConstructor
     [^{:s s/Any} line
      ^{:s s/Any} bubble
      ^{:s s/Any} area
@@ -105,18 +105,45 @@
 ;;
 
 (defn configure-axis
-  [axis {:keys [order-rule tick-format override-min]}]
-  (when override-min
-    (set! (.-overrideMin axis) override-min))
+  [axis {:keys [] :as axis-config}]
 
-  (when tick-format
-    (set! (.-tickFormat axis) tick-format))
+  (let [fields {:category-fields    "categoryFields"
+                :colors             "colors"
+                :clamp              "clamp"
+                :font-size          "fontSize"
+                :font-family        "fontFamily"
+                :gridline-shapes    "gridlineShapes"
+                :hidden             "hidden"
+                :log-base           "logBase"
+                :use-log            "useLog"
+                :measure            "measure"
+                :override-min       "overrideMin"
+                :show-gridlines     "showGridlines"
+                :show-percent       "showPercent"
+                :title-shape        "titleShape"
+                :tick-format        "tickFormat"
+                :time-field         "timeField"
+                :title              "title"
+                :floating-bar-width "floatingBarWidth"
+                :date-parse-format  "dateParseFormat"
+                :ticks              "ticks"
+                :time-period        "timePeriod"
+                :time-interval      "timeInterval"
+                :order-rule         "orderRule"
+                :group-order-rule   "groupOrderRule"}]
+    (doseq [[k field] fields]
+      (when-let [v (sm/safe-get axis-config k)]
+        (println k v field)
+        (aset axis field v))))
 
-  (when order-rule
-    (.addOrderRule axis order-rule)))
+  (when-let [v (sm/safe-get axis-config :order-rule)]
+    (.addOrderRule axis v))
+
+  (when-let [v (sm/safe-get axis-config :group-order-rule)]
+    (.addOrderRule axis v)))
 
 (defn add-category-axis
-  [chart axis-name field-name & {:keys [] :as axis-config}]
+  [chart axis-name field-name axis-config]
   (configure-axis
    (.addCategoryAxis chart axis-name field-name)
    axis-config)
@@ -129,7 +156,7 @@
    axis-config)
   chart)
 
-(defrecord AxisTypeConstructor
+(sm/defrecord AxisTypeConstructor
     [^{:s s/Any} category
      ^{:s s/Any} measure])
 
