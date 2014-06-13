@@ -65,9 +65,5 @@
       :interpolation     :cardinal
       :additional-series [:linear-trend {:data [{:cx 2000 :cy 10},
                                                 {:cx 2019 :cy 50}]}]
-      ;; Additional series?..
-      ;; (dimple/add-series   ["year" "series"]
-      ;;                        :linear-trend
-      ;;                        )
       })
     ]))

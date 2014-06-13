@@ -68,7 +68,6 @@
                             :supportedAxes (clj->js ["x" "y"])
 
                             :draw          (fn [chart series duration]
-                                             (println (.-data series))
                                              (let [line (-> js/d3
                                                             (.-svg)
                                                             (.line)
@@ -79,13 +78,19 @@
                                                             (.y (fn [d]
                                                                   (-> js/dimple
                                                                       .-_helpers
-                                                                      (.cy d chart series)))))]
-                                               (-> (.-svg chart)
-                                                   (.append "g")
-                                                   (.append "path")
-                                                   (.attr "d"
-                                                          (line (.-data series)))
-                                                   (.style "stroke" "blue"))))}))
+                                                                      (.cy d chart series)))))
+                                                   path (or (.-path series)
+                                                            (-> (.-svg chart)
+                                                                (.append "g")
+                                                                (.attr "class" "linear-trend")
+                                                                (.append "path")
+                                                                (.datum  (.-chartData series))
+                                                                (.attr "d" line)
+                                                                (.style "stroke" "blue")))]
+
+                                               (-> path
+                                                   (.attr "d" line))
+                                               (set! (.-path series) path)))}))
 
 ;; (def linear-trend    (-> js/dimple .-plot .-linearTrend))
 
@@ -155,7 +160,7 @@
       (set! (.-interpolation series) (sm/safe-get interpolations interpolation)))
 
     (when data
-      (set! (.-data series) (clj->js data))))
+      (set! (.-chartData series) (clj->js data))))
   chart)
 
 (defn draw

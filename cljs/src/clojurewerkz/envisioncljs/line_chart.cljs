@@ -38,7 +38,7 @@
         (dimple/add-axis     (sm/safe-get line-chart-config :x-type)
                              "x"
                              (sm/safe-get line-chart-config :x)
-                             :order-rule (sm/safe-get line-chart-config :x-order))
+                             {:order-rule (sm/safe-get line-chart-config :x-order)})
 
         (dimple/add-axis     (sm/safe-get line-chart-config :y-type)
                              "y" (sm/safe-get line-chart-config :y))
