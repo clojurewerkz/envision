@@ -5,9 +5,11 @@
             [schema.core                        :as s]
             [clojurewerkz.envision.chart-config :as cfg]
 
-            [clojurewerkz.statistiker.histograms   :as hist]
-            [clojurewerkz.statistiker.regression   :as regression]
-            [clojurewerkz.statistiker.distribution :as distribution]
+            [clojurewerkz.statistiker.clustering.kmeans :as km]
+            [clojurewerkz.statistiker.clustering.dbscan :as dbs]
+            [clojurewerkz.statistiker.histograms        :as hist]
+            [clojurewerkz.statistiker.regression        :as regression]
+            [clojurewerkz.statistiker.distribution      :as distribution]
 
             [clojure.java.browse :refer [browse-url]]))
 
@@ -62,9 +64,9 @@
        :x-type            :measure
        :y                 y-field
        :y-type            :measure
-       :x-config          {:order-rule "year"
+       :x-config          {:order-rule   x-field
                            :override-min min-x}
-       :series-type       "bubble"
+       :series-type       :bubble
        :data              data
        :series            series
        :additional-series [:linear-trend {:data (let [{:keys [intercept slope]} (regression/linear-regression
@@ -76,7 +78,64 @@
       (first config-overrides)))))
 
 
+(defn kmeans
+  "Only first two fields will be visualised. All fields should be measure fields."
+  [data fields k iterations & config-overrides]
+  (let [clusters (km/cluster-by data fields k iterations)]
+    (cfg/make-chart-config
+     (merge
+      {:id          "kmeans"
+       :headline    "K-Means Clusters"
+       :x           (first fields)
+       :y           (second fields)
+       :x-type      :measure
+       :y-type      :measure
+       :series-type :bubble
+       :data        clusters
+       :series      (conj fields :cluster-id)}
+      (first config-overrides)))))
+
+(defn dbscan
+  [data fields eps min-points & config-overrides]
+  (let [clusters (dbs/cluster-by data fields eps min-points)]
+    (cfg/make-chart-config
+     (merge
+      {:id          "dbscan"
+       :headline    "DBScan Clusters"
+       :x           (first fields)
+       :y           (second fields)
+       :x-type      :measure
+       :y-type      :measure
+       :series-type :bubble
+       :data        clusters
+       :series      (conj fields :cluster-id)}
+      (first config-overrides)))))
+
+
 (defn a []
+  (prepare-tmp-dir
+   [(dbscan  [{:a 1 :b 1 :c 1}
+              {:a 2 :b 2 :c 2}
+              {:a 3 :b 3 :c 3}
+              {:a 50 :b 50 :c 50}
+              {:a 51 :b 51 :c 51}
+              {:a 53 :b 53 :c 53}
+              {:a 54 :b 54 :c 54}]
+             [:a :b]
+             2.0
+             1)])
+
+  (prepare-tmp-dir
+   [(kmeans  [{:a 1 :b 1 :c 1}
+              {:a 2 :b 2 :c 2}
+              {:a 3 :b 3 :c 3}
+              {:a 50 :b 50 :c 50}
+              {:a 51 :b 51 :c 51}
+              {:a 53 :b 53 :c 53}
+              {:a 54 :b 54 :c 54}]
+             [:a :b :c]
+             2
+             100)])
   (prepare-tmp-dir
    [(histogram 10 (take 100 (distribution/normal-distribution 5 10))
                {:tick-format "s"})
