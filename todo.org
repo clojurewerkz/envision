@@ -1,11 +1,16 @@
 * DONE add interpolation to line charts
 * DONE add histograms
-* TODO add rounding to histograms
+* DONE add rounding to histograms
+* DONE linear regression
 * TODO multiple Y axes
-* TODO linear regression
 * TODO clustering
+** TODO DBScan
+* TODO classification
+** TODO 80/20 splits, confidence interval calculation
 * TODO for cases like periodicity detection, add vertical line into dimple
 * TODO add correlation between 2 data sets
 * TODO add a bit of layouting, at least split items vertically
 * TODO add fivenum lines as separate lines into dimple, as series
 * TODO figure out how to render a polynominal with coefficients in d3
+* TODO Add smoothing of time-series
+* TODO FFT
