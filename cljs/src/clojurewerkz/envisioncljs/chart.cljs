@@ -41,7 +41,8 @@ i(ns clojurewerkz.envisioncljs.chart
                              (sm/safe-get chart-config :x-config))
 
         (dimple/add-axis     (sm/safe-get chart-config :y-type)
-                             "y" (sm/safe-get chart-config :y)
+                             "y"
+                             (sm/safe-get chart-config :y)
                              (sm/safe-get chart-config :y-config))
 
         (dimple/add-series   (sm/safe-get chart-config :series)
