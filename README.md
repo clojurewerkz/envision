@@ -59,7 +59,7 @@ charts, customizing layouts and so on.
 
 ## Usage
 
-Main entrypoint is `clojurewerkz.envision.core/prepare-tmp-dir`. It creates a temporary
+Main entrypoint is `clojurewerkz.envision.core/render`. It creates a temporary
 directory with all the required dependencies and returns you a path to it. For example,
 let's generate some data and render a line and area charts:
 
@@ -68,7 +68,7 @@ let's generate some data and render a line and area charts:
   (:require [clojurewerkz.envision.core         :as envision]
             [clojurewerkz.envision.chart-config :as cfg]
 
-(envision/prepare-tmp-dir
+(envision/render
    [(envision/histogram 10 (take 100 (distribution/normal-distribution 5 10))
                {:tick-format "s"})
 
