@@ -122,7 +122,7 @@
            z
 
            x-config
-           x-config
+           y-config
 
            series-type
            series
