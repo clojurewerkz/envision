@@ -131,6 +131,7 @@
                 :time-interval      "timeInterval"
                 :order-rule         "orderRule"
                 :group-order-rule   "groupOrderRule"}]
+
     (doseq [[k field] fields]
       (when-let [v (sm/safe-get axis-config k)]
         (println k v field)
@@ -156,13 +157,42 @@
    axis-config)
   chart)
 
+(defn add-time-axis
+  [chart axis-name field-name axis-config]
+  (configure-axis
+   (.addTimeAxis chart axis-name field-name)
+   axis-config)
+  chart)
+
+(defn add-pct-axis
+  [chart axis-name field-name axis-config]
+  (configure-axis
+   (.addPctAxis chart axis-name field-name)
+   axis-config)
+  chart)
+
+(defn add-log-axis
+  [chart axis-name field-name axis-config]
+  (configure-axis
+   (.addLogAxis chart axis-name field-name)
+   axis-config)
+  chart)
+
 (sm/defrecord AxisTypeConstructor
     [^{:s s/Any} category
-     ^{:s s/Any} measure])
+     ^{:s s/Any} measure
+     ^{:s s/Any} time
+     ^{:s s/Any} log
+     ^{:s s/Any} pct
+     ])
 
 (def axis-type-constructors
   (->AxisTypeConstructor add-category-axis
-                         add-measure-axis))
+                         add-measure-axis
+                         add-time-axis
+                         add-log-axis
+                         add-pct-axis
+                         ))
 
 (defn add-axis
   [chart axis-type & args]
