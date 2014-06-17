@@ -1,4 +1,4 @@
-i(ns clojurewerkz.envisioncljs.chart
+(ns clojurewerkz.envisioncljs.chart
   (:require-macros [schema.macros :as sm])
   (:require [reagent.core            :as reagent :refer [atom]]
             [clojure.set             :as set]
@@ -70,7 +70,7 @@ i(ns clojurewerkz.envisioncljs.chart
   [chart-config chart-state]
   (with-meta (fn []
                (let [a @chart-state]
-                 [:div {:class "envision-chart"
+                 [:div {:class "col-md-6 envision-chart"
                         :key   (sm/safe-get chart-config :id)}
                   [:h1  (sm/safe-get chart-config :headline)]
                   ]))
@@ -86,10 +86,12 @@ i(ns clojurewerkz.envisioncljs.chart
   (fn []
     (let [data (js->clj js/renderData :keywordize-keys true)]
       [:div
-       (for [config data]
-         [(chart
-           (cfg/make-chart-config config)
-           (atom (make-empty-chart-state))
-           )])])))
+       (for [row (partition 2 2 nil data)]
+         [:div.row
+          (for [config row]
+            [(chart
+              (cfg/make-chart-config config)
+              (atom (make-empty-chart-state))
+              )])])])))
 
 (reagent/render-component [chart-app] (.getElementById js/document "app"))

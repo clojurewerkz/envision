@@ -130,26 +130,15 @@
 
            data
            additional-series
-           headline]
+           headline]}]
+  (->ChartConfig (or id "chart")
 
-    :or {id            "chart"
-
-         width         620
-         height        350
-         top-x         60
-         top-y         30
-         chart-width   500
-         chart-height  250
-
-         series-type   :line}}]
-  (->ChartConfig id
-
-                 width
-                 height
-                 top-x
-                 top-y
-                 chart-width
-                 chart-height
+                 (or width 580)
+                 (or height 350)
+                 (or top-x 60)
+                 (or top-y 30)
+                 (or chart-width 500)
+                 (or chart-height 250)
 
                  x
                  (or (keyword x-type) :category)
@@ -160,7 +149,7 @@
                  (make-axis-config x-config)
                  (make-axis-config y-config)
 
-                 (keyword series-type)
+                 (or (keyword series-type) :line)
                  series
                  (keyword interpolation)
 

@@ -54,17 +54,7 @@
 
            data
            additional-series
-           headline]
-    :or {id            "chart"
-
-         width         620
-         height        350
-         top-x         60
-         top-y         30
-         chart-width   500
-         chart-height  250
-
-         series-type   :line}}]
+           headline]}]
 
   (->ChartConfig id
 
