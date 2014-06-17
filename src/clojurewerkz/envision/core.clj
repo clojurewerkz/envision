@@ -16,7 +16,7 @@
             [clojure.java.browse :refer [browse-url]]))
 
 
-(defn prepare-tmp-dir
+(defn render
   "Prepares a tmp directory with all templates and returns a path to it"
   [data]
   (let [temp-dir (fs/temp-dir "envision-")
@@ -52,7 +52,7 @@
        :y           "y"
        :series-type "bar"
        :data        hist}
-      (first config-overrides)))))
+      (or (first config-overrides) {})))))
 
 (defn linear-regression
   [data x-field y-field series & config-overrides]
@@ -77,7 +77,7 @@
                                                   [{:cx min-x :cy (+ intercept (* slope min-x))},
                                                    {:cx max-x :cy (+ intercept (* slope max-x))}])}]
        }
-      (first config-overrides)))))
+      (or (first config-overrides) {})))))
 
 
 (defn kmeans
@@ -95,7 +95,7 @@
        :series-type :bubble
        :data        clusters
        :series      (conj fields :cluster-id)}
-      (first config-overrides)))))
+      (or (first config-overrides) {})))))
 
 (defn dbscan
   [data fields eps min-points & config-overrides]
@@ -111,11 +111,11 @@
        :series-type :bubble
        :data        clusters
        :series      (conj fields :cluster-id)}
-      (first config-overrides)))))
+      (or (first config-overrides) {})))))
 
 
 (defn a []
-  (prepare-tmp-dir
+  (render
    [(dbscan  [{:a 1 :b 1 :c 1}
               {:a 2 :b 2 :c 2}
               {:a 3 :b 3 :c 3}
@@ -127,7 +127,7 @@
              2.0
              1)])
 
-  (prepare-tmp-dir
+  (render
    [(kmeans  [{:a 1 :b 1 :c 1}
               {:a 2 :b 2 :c 2}
               {:a 3 :b 3 :c 3}
@@ -138,7 +138,8 @@
              [:a :b :c]
              2
              100)])
-  (prepare-tmp-dir
+
+  (render
    [(histogram 10 (take 100 (distribution/normal-distribution 5 10))
                {:tick-format "s"})
 
