@@ -5,6 +5,8 @@
             [schema.core                        :as s]
             [clojurewerkz.envision.chart-config :as cfg]
 
+            [clojurewerkz.envision.util         :refer [deep-merge]]
+
             [clojurewerkz.statistiker.clustering.kmeans :as km]
             [clojurewerkz.statistiker.clustering.dbscan :as dbs]
             [clojurewerkz.statistiker.histograms        :as hist]
@@ -42,7 +44,7 @@
   (let [hist (->> (hist/empirical-distribution bins data)
                   (map (fn [[x y]] {:x (format "%.3f" x) :y y})))]
     (cfg/make-chart-config
-     (merge
+     (deep-merge
       {:id          "histogram"
        :headline    "Histogram"
        :x           "x"
@@ -57,7 +59,7 @@
   (let [d             (map x-field data)
         [min-x max-x] [(apply min d) (apply max d)]]
     (cfg/make-chart-config
-     (merge
+     (deep-merge
       {:id                "bubble"
        :headline          "Linear Regression"
        :x                 x-field
@@ -83,7 +85,7 @@
   [data fields k iterations & config-overrides]
   (let [clusters (km/cluster-by data fields k iterations)]
     (cfg/make-chart-config
-     (merge
+     (deep-merge
       {:id          "kmeans"
        :headline    "K-Means Clusters"
        :x           (first fields)
@@ -99,7 +101,7 @@
   [data fields eps min-points & config-overrides]
   (let [clusters (dbs/cluster-by data fields eps min-points)]
     (cfg/make-chart-config
-     (merge
+     (deep-merge
       {:id          "dbscan"
        :headline    "DBScan Clusters"
        :x           (first fields)
