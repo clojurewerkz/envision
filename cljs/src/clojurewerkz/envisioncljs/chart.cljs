@@ -81,6 +81,16 @@
                                              chart-state
                                              ))}))
 
+
+(defn table
+  [rows]
+  [:div.table-responsive
+   [:table.table.table-striped.table-condensed
+    (for [row rows]
+      [:tr
+       (for [[_ v] row]
+         [:td (str v)])])]])
+
 (defn chart-app
   []
   (fn []
@@ -89,9 +99,14 @@
        (for [row (partition 2 2 nil data)]
          [:div.row
           (for [config row]
-            [(chart
-              (cfg/make-chart-config config)
-              (atom (make-empty-chart-state))
-              )])])])))
+            (if (= "table" (:series-type config))
+              [:div.col-md-6
+               (table (:data config))]
+              [(chart
+                (cfg/make-chart-config config)
+                (atom (make-empty-chart-state))
+                )]
+
+              ))])])))
 
 (reagent/render-component [chart-app] (.getElementById js/document "app"))
