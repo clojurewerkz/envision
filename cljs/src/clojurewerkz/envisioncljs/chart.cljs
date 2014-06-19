@@ -4,6 +4,8 @@
             [clojure.set             :as set]
             [schema.core             :as s]
 
+
+            [clojurewerkz.envisioncljs.button       :as b]
             [clojurewerkz.envisioncljs.chart_config :as cfg]
             [clojurewerkz.envisioncljs.dimple       :as dimple]
             [clojurewerkz.envisioncljs.utils        :as u]))
@@ -31,10 +33,13 @@
 
     (validate-chart-state
      (swap! chart-state #(assoc %
-                                :chart chart)))
+                           :chart chart)))
 
     (-> chart
-        (dimple/set-data     (sm/safe-get chart-config :data))
+        (dimple/set-data     (clj->js
+                              (->> (sm/safe-get chart-config :data)
+                                   identity
+                                   )))
         (dimple/add-axis     (sm/safe-get chart-config :x-type)
                              "x"
                              (sm/safe-get chart-config :x)
@@ -63,8 +68,7 @@
                              (sm/safe-get chart-config :chart-width)
                              (sm/safe-get chart-config :chart-height)
                              )
-        (dimple/draw))
-    ))
+        (dimple/draw))))
 
 (defn chart
   [chart-config chart-state]
@@ -72,14 +76,23 @@
                (let [a @chart-state]
                  [:div {:class "col-md-6 envision-chart"
                         :key   (sm/safe-get chart-config :id)}
-                  [:h1  (sm/safe-get chart-config :headline)]
-                  ]))
-    ;;
+                  [:h1 (sm/safe-get chart-config :headline)]
+                  (for [axe ["x" "y"]]
+                    [b/button-list-widget
+                     (str (sm/safe-get chart-config :id) "-select")
+                     (->> (sm/safe-get chart-config :data)
+                          (first)
+                          keys
+                          (map name))
+                     :onChange #(let [chart (sm/safe-get @chart-state :chart)]
+                                  (-> chart
+                                      (dimple/set-axis-measure axe %)
+                                      (dimple/draw)))])]))
     {:component-did-mount (fn [this]
                             (init-chart this
-                                             chart-config
-                                             chart-state
-                                             ))}))
+                                        chart-config
+                                        chart-state
+                                        ))}))
 
 
 (defn table

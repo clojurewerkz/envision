@@ -233,3 +233,14 @@
 (defn filter-data
   [data field accepted-values]
   (.filterData js/dimple data field (clj->js accepted-values)))
+
+(defn set-axis-measure
+  [chart axis measure]
+  (let [axe (->> chart
+                  (.-axes)
+                  (filter #(= axis (.-position %)))
+                  first
+                  )]
+    (aset axe "measure" measure))
+  chart
+  )

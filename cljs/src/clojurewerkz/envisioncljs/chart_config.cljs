@@ -53,6 +53,7 @@
            time-interval
            order-rule
            group-order-rule]}]
+
   (->AxisConfig category-fields
                 colors
                 clamp
@@ -153,6 +154,6 @@
                  series
                  (keyword interpolation)
 
-                 (clj->js data)
+                 data
                  additional-series
                  headline))
