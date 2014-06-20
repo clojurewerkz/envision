@@ -4,7 +4,9 @@
 * DONE linear regression
 * TODO multiple Y axes
 * TODO clustering
-** TODO DBScan
+** DONE DBScan
+** DONE KMeans
+** Elbow method for evaluaition
 * TODO classification
 ** TODO 80/20 splits, confidence interval calculation
 * TODO for cases like periodicity detection, add vertical line into dimple
@@ -14,3 +16,8 @@
 * TODO figure out how to render a polynominal with coefficients in d3
 * TODO Add smoothing of time-series
 * TODO FFT
+* TODO Scatterplot matrix?
+* TODO Q-Q plots
+* TODO turn on/off different categorical values (or even numerical)?
+* TODO Scaling of the dataset
+* TODO number to ratio

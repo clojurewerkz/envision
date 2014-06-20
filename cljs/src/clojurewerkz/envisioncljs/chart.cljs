@@ -87,7 +87,22 @@
                      :onChange #(let [chart (sm/safe-get @chart-state :chart)]
                                   (-> chart
                                       (dimple/set-axis-measure axe %)
-                                      (dimple/draw)))])]))
+                                      (dimple/draw)))])
+
+                  ;; TODO: this requires massive refactoring
+                  [b/button-list-widget
+                   (str (sm/safe-get chart-config :id) "-cluster-filter")
+                   (->> (sm/safe-get chart-config :data)
+                        (map :cluster-id)
+                        distinct)
+                   :multi? true
+                   :onChange #(let [chart (sm/safe-get @chart-state :chart)]
+                                (-> chart
+                                    (dimple/set-data (dimple/filter-data (clj->js (sm/safe-get chart-config :data))
+                                                                         "cluster-id"
+                                                                         %))
+                                    (dimple/draw)))]
+                  ]))
     {:component-did-mount (fn [this]
                             (init-chart this
                                         chart-config
