@@ -12,3 +12,6 @@ _site
 .bundle
 bin
 resources/assets/cljs
+assets/
+repl-port
+.nrepl*
