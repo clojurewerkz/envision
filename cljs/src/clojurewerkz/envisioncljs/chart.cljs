@@ -130,7 +130,7 @@
                    ["Toggle Config"]
                    :onChange #(swap! chart-state assoc :config-shown (not (nil? %)))]
                   (if (sm/safe-get a :config-shown)
-                    [:table.top-aligned {:key (str id "-config")}
+                    [:table.table.top-aligned {:key (str id "-config")}
                      [:tr
                       [:td
                        (axis-measure-picker "x" chart-config chart-state)]
