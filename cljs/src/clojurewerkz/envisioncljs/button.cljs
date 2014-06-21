@@ -12,9 +12,19 @@
 
 (defn toggle-multiple
   [st new]
+  (println (first st) new )
   (if (nil? (get st new))
     (conj st new)
     (disj st new)))
+
+(defn maybe
+  [allow-empty toggle-fn]
+  (fn [old-v new-v]
+    (let [new-v (toggle-fn old-v new-v)]
+      (if (and (not allow-empty)
+               (empty? new-v))
+        old-v
+        new-v))))
 
 (defn is-active?
   [current active]
@@ -25,26 +35,29 @@
   (not (nil? (get active current))))
 
 (defn button-list-widget
-  [key items & {:keys [onChange single-value inline? initial-state multi? active?]
-                :or {inline?  true
-                     multi?   false
-                     onChange identity}}]
+  [key items & {:keys [onChange single-value inline? initial-state multi? active? allow-empty]
+                :or {inline?     true
+                     multi?      false
+                     onChange    identity
+                     allow-empty true}}]
   (let [initial-state (or initial-state (if multi? #{} nil))
         active?       (if multi? is-active-multiple? is-active?)
-        active-state  (atom initial-state)]
+        active-state  (atom initial-state)
+        allow-empty   allow-empty]
     (fn []
       (let [active @active-state]
-        [:div.btn-group
+        [:div.btn-group-vertical
          (for [item items]
            (button-widget item
                           :value item
-                          :class (if (active? item active) "btn-success" "btn-primary")
+                          :class (if (active? item active) "btn-success" "btn-default")
                           :onClick (fn [e]
                                      (let [val (.val (js/jQuery (.-target e)))]
                                        (onChange
-                                        (swap! active-state (if multi?
-                                                              toggle-multiple
-                                                              toggle)
+                                        (swap! active-state (maybe allow-empty
+                                                                   (if multi?
+                                                                     toggle-multiple
+                                                                     toggle))
                                                val))))))]))))
 
 (defn propagate-state

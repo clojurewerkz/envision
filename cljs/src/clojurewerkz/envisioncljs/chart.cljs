@@ -14,7 +14,9 @@
 
 (sm/defrecord ChartState
     [^{:s s/Any}                 chart
-     ^{:s s/Bool}                did-unmount])
+     ^{:s s/Bool}                did-unmount
+     ^{:s s/Bool}                config-shown
+     ])
 
 (defn validate-chart-state
   [a]
@@ -22,7 +24,7 @@
 
 (defn make-empty-chart-state
   []
-  (ChartState. nil false))
+  (ChartState. nil false false))
 
 (defn- init-chart
   [this chart-config chart-state]
@@ -70,38 +72,74 @@
                              )
         (dimple/draw))))
 
+(defn axis-measure-picker
+  [axe chart-config chart-state]
+  [:div
+   [:h3 (str (clojure.string/capitalize axe) " axis measure")]
+   (let [buttons (->> (sm/safe-get chart-config :data)
+                      (first)
+                      keys
+                      (map name))]
+     [b/button-list-widget
+      (str (sm/safe-get chart-config :id) "-select")
+      buttons
+      :initial-state (sm/safe-get chart-config (keyword axe))
+      :allow-empty   false
+      :onChange      #(let [chart (sm/safe-get @chart-state :chart)]
+                        ;; Add switch back to empty
+                        (-> chart
+                            (dimple/set-axis-measure axe %)
+                            (dimple/draw)))])])
+
+(defn parse-int
+  [i]
+  (js/parseInt i))
+
+(defn cluster-filter
+  [chart-config chart-state]
+  (let [vals (->> (sm/safe-get chart-config :data)
+                  (map :cluster-id)
+                  distinct
+                  (map str))]
+    [:div
+     [:h3 "Cluster Filter"]
+     [b/button-list-widget
+      (str (sm/safe-get chart-config :id) "-cluster-filter")
+      vals
+      :multi?        true
+      :inline?       false
+      :allow-empty   false
+      :initial-state (set vals)
+      :onChange      #(let [chart (sm/safe-get @chart-state :chart)]
+                        (-> chart
+                            (dimple/set-data (dimple/filter-data (clj->js (sm/safe-get chart-config :data))
+                                                                 "cluster-id"
+                                                                 %))
+                            (dimple/draw)))]]))
+
 (defn chart
   [chart-config chart-state]
   (with-meta (fn []
-               (let [a @chart-state]
-                 [:div {:class "col-md-6 envision-chart"
-                        :key   (sm/safe-get chart-config :id)}
+               (let [a  @chart-state
+                     id (sm/safe-get chart-config :id)]
+                 [:div {:class "highlight col-md-6 envision-chart"
+                        :key   id}
                   [:h1 (sm/safe-get chart-config :headline)]
-                  (for [axe ["x" "y"]]
-                    [b/button-list-widget
-                     (str (sm/safe-get chart-config :id) "-select")
-                     (->> (sm/safe-get chart-config :data)
-                          (first)
-                          keys
-                          (map name))
-                     :onChange #(let [chart (sm/safe-get @chart-state :chart)]
-                                  (-> chart
-                                      (dimple/set-axis-measure axe %)
-                                      (dimple/draw)))])
-
-                  ;; TODO: this requires massive refactoring
                   [b/button-list-widget
-                   (str (sm/safe-get chart-config :id) "-cluster-filter")
-                   (->> (sm/safe-get chart-config :data)
-                        (map :cluster-id)
-                        distinct)
-                   :multi? true
-                   :onChange #(let [chart (sm/safe-get @chart-state :chart)]
-                                (-> chart
-                                    (dimple/set-data (dimple/filter-data (clj->js (sm/safe-get chart-config :data))
-                                                                         "cluster-id"
-                                                                         %))
-                                    (dimple/draw)))]
+                   (str id "-config-toggle")
+                   ["Toggle Config"]
+                   :onChange #(swap! chart-state assoc :config-shown (not (nil? %)))]
+                  (if (sm/safe-get a :config-shown)
+                    [:table.top-aligned {:key (str id "-config")}
+                     [:tr
+                      [:td
+                       (axis-measure-picker "x" chart-config chart-state)]
+                      [:td
+                       (axis-measure-picker "y" chart-config chart-state)]
+                      [:td
+                       (cluster-filter chart-config chart-state)]]]
+                    [:div.dummie {:key (str id "-config")}])
+
                   ]))
     {:component-did-mount (fn [this]
                             (init-chart this

@@ -134,11 +134,12 @@
            headline]}]
   (->ChartConfig (or id "chart")
 
-                 (or width 580)
+                 (or width 560)
                  (or height 350)
                  (or top-x 60)
                  (or top-y 30)
-                 (or chart-width 500)
+                 (or chart-width 480)
+
                  (or chart-height 250)
 
                  x
