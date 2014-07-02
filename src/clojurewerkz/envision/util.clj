@@ -13,3 +13,10 @@
 (defn deep-merge
   [& maps]
   (apply deep-merge-with (fn [x y] y) maps))
+
+(defn add-serial-ids
+  [v]
+  (map
+   #(assoc %1 :serial-id %2)
+   v
+   (iterate inc 0)))
