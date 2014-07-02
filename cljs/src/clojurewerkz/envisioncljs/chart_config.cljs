@@ -14,6 +14,7 @@
      ^{:s s/Any} use-log
      ^{:s s/Any} measure
      ^{:s s/Any} override-min
+     ^{:s s/Any} override-max
      ^{:s s/Any} show-gridlines
      ^{:s s/Any} show-percent
      ^{:s s/Any} title-shape
@@ -40,6 +41,7 @@
            use-log
            measure
            override-min
+           override-max
            show-gridlines
            show-percent
            title-shape
@@ -65,6 +67,7 @@
                 use-log
                 measure
                 override-min
+                override-max
                 show-gridlines
                 show-percent
                 title-shape

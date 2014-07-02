@@ -5,7 +5,7 @@
             [schema.core                        :as s]
             [clojurewerkz.envision.chart-config :as cfg]
 
-            [clojurewerkz.envision.util         :refer [deep-merge]]
+            [clojurewerkz.envision.util         :refer [deep-merge add-serial-ids]]
 
             [clojurewerkz.statistiker.clustering.kmeans :as km]
             [clojurewerkz.statistiker.clustering.dbscan :as dbs]
@@ -184,3 +184,29 @@
       :interpolation :cardinal
       })
     ]))
+
+(comment
+  (render
+   [(cfg/make-chart-config
+     {:id            "line"
+      :headline      "Curve fitting (Gaussian)"
+      :x             "a"
+      :y             "b"
+      :x-type        :measure
+      :y-type        :measure
+      :x-config      {
+                      :override-min (reduce min (map :a clojurewerkz.statistiker.fitting-test/dataset-1))
+                      ;; :override-max (reduce max (map :a clojurewerkz.statistiker.fitting-test/dataset-1))
+                      }
+      :series-type   "line"
+      :data          (add-serial-ids
+                      (concat
+                       (map
+                        #(assoc % :type "fitted")
+                        (clojurewerkz.statistiker.fitting/fit clojurewerkz.statistiker.fitting-test/dataset-1 :a :b 30))
+                       (map
+                        #(assoc % :type "original")
+                        clojurewerkz.statistiker.fitting-test/dataset-1)))
+      :series        ["serial-id" "type"]
+      :interpolation :cardinal
+      })]))
