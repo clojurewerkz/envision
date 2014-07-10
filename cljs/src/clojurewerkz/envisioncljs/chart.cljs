@@ -149,13 +149,50 @@
 
 
 (defn table
-  [rows]
-  [:div.table-responsive
-   [:table.table.table-striped.table-condensed
-    (for [row rows]
-      [:tr
-       (for [[_ v] row]
-         [:td (str v)])])]])
+  [data-atom]
+  (let [sort-direction (atom nil)
+        filters-atom (atom {})]
+    (fn []
+      (let [rows    @data-atom
+            filters @filters-atom]
+        [:div.table-responsive
+         [:table.table.table-striped.table-condensed
+          [:thead
+           [:tr
+            (for [key (-> rows first keys)]
+              [:td {:onClick (fn []
+                               (swap! sort-direction (fn [a]
+                                                       (if (= key (first a))
+                                                         [key (not (last a))]
+                                                         [key true])))
+                               (swap! data-atom (fn [old]
+                                                  (let [[k d] @sort-direction]
+                                                    (sort-by k (if d > <) old))
+
+                                                  ))
+                               )}
+               [:div
+                (name key)
+                [:input {:type text :onChange (fn [e]
+                                                (let [v (.-value (.-target e))]
+                                                  (if (empty? v)
+                                                    (swap! filters-atom dissoc key)
+                                                    (swap! filters-atom assoc key v)
+                                                    ))
+                                                )}]
+                ]
+               ])]]
+
+          [:tbody
+           (for [row (filter (fn [r]
+                               (every?
+                                (fn [[fk fv]]
+                                  (not (= -1 (.indexOf (str (get r fk)) fv))))
+                                filters))
+                             rows)]
+             [:tr
+              (for [[_ v] row]
+                [:td (str v)])])]]]))))
 
 (defn chart-app
   []
@@ -167,7 +204,7 @@
           (for [config row]
             (if (= "table" (:series-type config))
               [:div.col-md-6
-               (table (:data config))]
+               [table (atom (:data config))]]]
               [(chart
                 (cfg/make-chart-config config)
                 (atom (make-empty-chart-state))
