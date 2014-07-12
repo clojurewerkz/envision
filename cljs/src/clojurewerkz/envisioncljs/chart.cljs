@@ -168,9 +168,7 @@
                                (swap! data-atom (fn [old]
                                                   (let [[k d] @sort-direction]
                                                     (sort-by k (if d > <) old))
-
-                                                  ))
-                               )}
+                                                  )))}
                [:div
                 (name key)
                 [:input {:type text :onChange (fn [e]
@@ -205,11 +203,11 @@
             (if (= "table" (:series-type config))
               [:div.col-md-6
                [table (atom (:data config))]]]
-              [(chart
-                (cfg/make-chart-config config)
-                (atom (make-empty-chart-state))
-                )]
+            [(chart
+              (cfg/make-chart-config config)
+              (atom (make-empty-chart-state))
+              )]
 
-              ))])])))
+            ))])])))
 
 (reagent/render-component [chart-app] (.getElementById js/document "app"))
