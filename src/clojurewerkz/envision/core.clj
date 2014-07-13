@@ -40,19 +40,21 @@
 
 (defn histogram
   "Histogram accepts a vector of values"
-  [bins data & config-overrides]
-  (let [hist (->> (hist/empirical-distribution bins data)
-                  (map (fn [[x y]] {:x (format "%.3f" x) :y y})))]
-    (cfg/make-chart-config
-     (deep-merge
-      {:id          "histogram"
-       :headline    "Histogram"
-       :x           "x"
-       :x-config    {:order-rule :x}
-       :y           "y"
-       :series-type "bar"
-       :data        hist}
-      (or (first config-overrides) {})))))
+  ([bins data]
+     (histogram bins data))
+  ([bins data config-overrides]
+     (let [hist (->> (hist/empirical-distribution bins data)
+                     (map (fn [[x y]] {:x (format "%.3f" x) :y y})))]
+       (cfg/make-chart-config
+        (deep-merge
+         {:id          "histogram"
+          :headline    "Histogram"
+          :x           "x"
+          :x-config    {:order-rule :x}
+          :y           "y"
+          :series-type "bar"
+          :data        hist}
+         config-overrides)))))
 
 (defn linear-regression
   [data x-field y-field series & config-overrides]

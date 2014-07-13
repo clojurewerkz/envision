@@ -212,7 +212,7 @@
   chart)
 
 (defn add-series
-  [chart series-literals series-type {:keys [interpolation data] :as cfg}]
+  [chart series-literals series-type {:keys [interpolation data force-data] :as cfg}]
   (let [series (.addSeries chart
                            (clj->js series-literals)
                            (sm/safe-get series-type-constructors
@@ -222,7 +222,10 @@
       (set! (.-interpolation series) (sm/safe-get interpolations interpolation)))
 
     (when data
-      (set! (.-chartData series) (clj->js data))))
+      (set! (.-chartData series) (clj->js data)))
+
+    (when force-data
+      (set! (.-data series) (clj->js force-data))))
   chart)
 
 (defn draw
@@ -242,5 +245,4 @@
                   first
                   )]
     (aset axe "measure" measure))
-  chart
-  )
+  chart)

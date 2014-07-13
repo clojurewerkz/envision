@@ -9,38 +9,43 @@
 
 
 (defn fit-curve
-  [v x y fitter function]
-  (envision/render
-   [(cfg/make-chart-config
-     {:id            "line"
-      :headline      "Curve fitting (Gaussian)"
-      :x             (name x)
-      :y             (name y)
-      :x-type        :measure
-      :y-type        :measure
-      :x-config      {:override-min (reduce min (map x v))}
-      :series-type   "line"
-      :data          (add-serial-ids
-                      (concat
-                       (map
-                        #(assoc % :type "fitted")
-                        (fitting/fit v
-                                     x y
-                                     fitter
-                                     function
-                                     30))
-                       (map
-                        #(assoc % :type "original")
-                        v)))
-      :series        ["serial-id" "type"]
-      :interpolation :cardinal
-      })])
-  )
+  ([v x y fitter function]
+     (fit-curve v x y fitter function {}))
+  ([v x y fitter function config-overrides]
+     (cfg/make-chart-config
+      (deep-merge
+       {:id                "line"
+        :x                 (name x)
+        :y                 (name y)
+        :x-type            :measure
+        :y-type            :measure
+        :x-config          {:override-min (reduce min (map x v))}
+        :series-type       "line"
+        :data              (->> (fitting/fit v
+                                             x y
+                                             fitter
+                                             function
+                                             30)
+                                (map #(assoc % :type "fitted"))
+                                add-serial-ids)
+
+        :series            ["serial-id" "type"]
+        :additional-series [:bubble {:force-data (->> v
+                                                (map #(assoc % :type "original"))
+                                                add-serial-ids)}]
+        :interpolation     :cardinal}
+       config-overrides))))
 
 (comment
-  (fit-curve dss/bell-curve-formed :a :b fitting/gaussian-fitter fns/gaussian-function)
-  (fit-curve dss/poly-curve-formed
-             :a
-             :b
-             #(fitting/polynomial-fitter % 100 [0 0 0 0 0])
-             fns/polynomial-function))
+  (envision/render
+   [(fit-curve dss/bell-curve-formed
+               :a :b
+               fitting/gaussian-fitter
+               fns/gaussian-function
+               {:headline "Gaussian Fitter"})
+    (fit-curve dss/poly-curve-formed
+               :a :b
+               #(fitting/polynomial-fitter % 100 [0 0 0 0 0])
+               fns/polynomial-function
+               {:headline "Poly Curve Fitting"})
+    ]))
