@@ -20,4 +20,5 @@
 * TODO Q-Q plots
 * TODO turn on/off different categorical values (or even numerical)?
 * TODO Scaling of the dataset
-* TODO number to ratio
+* DONE number to ratio
+* TODO remove cluster filter from non-clusterable graphs
