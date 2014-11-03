@@ -1,6 +1,6 @@
 (ns clojurewerkz.envision.core
-  (:require [me.raynes.fs                       :as fs]
-            [cheshire.core                      :as json]
+  (:import [org.apache.commons.io FileUtils])
+  (:require [cheshire.core                      :as json]
             [clojure.java.io                    :as io]
             [schema.core                        :as s]
             [clojurewerkz.envision.chart-config :as cfg]
@@ -15,26 +15,56 @@
 
             [clojure.java.browse :refer [browse-url]]))
 
+(defn temp-name
+  "Create a temporary file name like what is created for [[temp-file]]
+   and [[temp-dir]]."
+  ([prefix] (temp-name prefix ""))
+  ([prefix suffix]
+     (format "%s%s-%s%s" prefix (System/currentTimeMillis)
+             (long (rand 0x100000000)) suffix)))
+
+(defn extract-resources [dest-path filename-re]
+  (let [zip-path (-> (clojure.java.io/resource "assets")
+                     (.getPath )
+                     (.replace "!/assets" "")
+                     (.replace "file:" ""))
+        zip-file (java.util.zip.ZipFile. zip-path)]
+    (doseq [zip-entry (enumeration-seq (.entries zip-file))]
+      (let [entry-name (.getName zip-entry)]
+        (cond
+         (.isDirectory zip-entry)
+         (FileUtils/forceMkdir (io/file entry-name))
+
+         (re-matches filename-re entry-name)
+         (FileUtils/copyInputStreamToFile (.getInputStream zip-file zip-entry)
+                                          (io/file (str dest-path entry-name))))))))
 
 (defn render
   "Prepares a tmp directory with all templates and returns a path to it"
   [data]
-  (let [temp-dir (fs/temp-dir "envision-")
-        path     (.getPath temp-dir)
-        index    (str path "/index.html")]
-    (doseq [dir ["assets"
-                 "templates"]]
-      (fs/copy-dir (clojure.java.io/resource dir) temp-dir))
+  (let [dest-path (str (FileUtils/getTempDirectoryPath) (temp-name "envision-") "/")
+        index     (str dest-path "/index.html")]
 
-    (fs/copy-dir (clojure.java.io/resource "src")
-                 (io/file (str path "/cljs/src" )))
+    (FileUtils/forceMkdir (io/file dest-path))
 
-    (fs/copy (clojure.java.io/resource "template.project.clj")
-             (str path "/cljs/project.clj"))
+    (extract-resources dest-path #"assets(.*)")
+    (extract-resources dest-path #"templates(.*)")
+    (extract-resources dest-path #"src(.*)")
+    (extract-resources dest-path #"template.project.clj")
 
-    (spit (str path "/assets/data/data.js")
+    (FileUtils/moveDirectoryToDirectory
+     (io/file (str dest-path "/src" ))
+     (io/file (str dest-path "/cljs/src"))
+     true)
+
+    (FileUtils/moveFile
+     (io/file (str dest-path "template.project.clj"))
+     (io/file (str dest-path "/cljs/project.clj")))
+
+    (spit (str dest-path "/assets/data/data.js")
           (str "var renderData = "(json/generate-string data) ";"))
-    path
+
+    dest-path
     ;; (browse-url (str "file://" index))
     ))
 
@@ -186,3 +216,10 @@
       :interpolation :cardinal
       })
     ]))
+
+(comment
+  (-> (clojure.java.io/resource "assets")
+      (.getPath )
+      (.replace "!/assets" "")
+      (.replace "file:" "")
+      ))
