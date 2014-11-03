@@ -1,4 +1,4 @@
-(defproject clojurewerkz.envision "0.1.0-SNAPSHOT"
+(defproject clojurewerkz/envision "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -10,4 +10,13 @@
                  [me.raynes/fs             "1.4.4"]
                  [cheshire                 "5.3.1"]
                  [prismatic/schema         "0.2.2"]
-                 [clojurewerkz/statistiker "0.1.0-SNAPSHOT"]])
+                 [clojurewerkz/statistiker "0.1.0-SNAPSHOT"]
+                 [commons-io/commons-io    "2.4"]]
+
+
+  :repositories {"sonatype"               {:url "http://oss.sonatype.org/content/repositories/releases"
+                                           :snapshots false
+                                           :releases {:checksum :fail}}
+                 "sonatype-snapshots"     {:url "http://oss.sonatype.org/content/repositories/snapshots"
+                                           :snapshots true
+                                           :releases {:checksum :fail :update :always}}})
