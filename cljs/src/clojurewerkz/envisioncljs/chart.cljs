@@ -125,21 +125,7 @@
                  [:div {:class "highlight col-md-6 envision-chart"
                         :key   id}
                   [:h1 (sm/safe-get chart-config :headline)]
-                  [b/button-list-widget
-                   (str id "-config-toggle")
-                   ["Toggle Config"]
-                   :onChange #(swap! chart-state assoc :config-shown (not (nil? %)))]
-                  (if (sm/safe-get a :config-shown)
-                    [:table.table.top-aligned {:key (str id "-config")}
-                     [:tr
-                      [:td
-                       (axis-measure-picker "x" chart-config chart-state)]
-                      [:td
-                       (axis-measure-picker "y" chart-config chart-state)]
-                      [:td
-                       (cluster-filter chart-config chart-state)]]]
-                    [:div.dummie {:key (str id "-config")}])
-
+                  ;; (plugin chat-config chart-sate)
                   ]))
     {:component-did-mount (fn [this]
                             (init-chart this
@@ -200,6 +186,7 @@
        (for [row (partition 2 2 nil data)]
          [:div.row
           (for [config row]
+            ;; TODO: Make series rendererer a protocol
             (if (= "table" (:series-type config))
               [:div.col-md-6
                [table (atom (:data config))]
