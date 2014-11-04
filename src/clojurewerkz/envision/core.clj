@@ -1,5 +1,8 @@
 (ns clojurewerkz.envision.core
-  (:import [org.apache.commons.io FileUtils])
+  (:import [org.apache.commons.io FileUtils]
+           [sun.net.www.protocol.jar JarURLConnection$JarURLInputStream]
+           [sun.net.www.content.text PlainTextInputStream]
+           )
   (:require [cheshire.core                      :as json]
             [clojure.java.io                    :as io]
             [schema.core                        :as s]
@@ -23,21 +26,40 @@
      (format "%s%s-%s%s" prefix (System/currentTimeMillis)
              (long (rand 0x100000000)) suffix)))
 
-(defn extract-resources [dest-path filename-re]
-  (let [zip-path (-> (clojure.java.io/resource "assets")
-                     (.getPath )
-                     (.replace "!/assets" "")
-                     (.replace "file:" ""))
-        zip-file (java.util.zip.ZipFile. zip-path)]
-    (doseq [zip-entry (enumeration-seq (.entries zip-file))]
-      (let [entry-name (.getName zip-entry)]
-        (cond
-         (.isDirectory zip-entry)
-         (FileUtils/forceMkdir (io/file entry-name))
+(defn extract-resources [dest-path filename]
+  (cond
+   (= PlainTextInputStream
+      (type (.getContent (io/resource "template.project.clj"))))
+   (let [file (io/file (clojure.java.io/resource filename))]
+     (if (.isDirectory file)
+       (FileUtils/copyDirectoryToDirectory
+        (io/file file)
+        (io/file dest-path))
+       (FileUtils/copyFileToDirectory
+        (io/file file)
+        (io/file dest-path))))
 
-         (re-matches filename-re entry-name)
-         (FileUtils/copyInputStreamToFile (.getInputStream zip-file zip-entry)
-                                          (io/file (str dest-path entry-name))))))))
+   (= sun.net.www.protocol.jar.JarURLConnection$JarURLInputStream
+      (type (.getContent (io/resource "template.project.clj"))))
+
+   (let [zip-path (-> (io/resource "template.project.clj")
+                      (.getPath )
+                      (.replace "!/template.project.clj" "")
+                      (.replace "file:" ""))
+         zip-file (java.util.zip.ZipFile. zip-path)]
+     (doseq [zip-entry (enumeration-seq (.entries zip-file))]
+       (let [entry-name (.getName zip-entry)]
+         (cond
+          (.isDirectory zip-entry)
+          (FileUtils/forceMkdir (io/file entry-name))
+
+          (.startsWith entry-name filename)
+          (FileUtils/copyInputStreamToFile (.getInputStream zip-file zip-entry)
+                                           (io/file (str dest-path entry-name)))))))
+
+   :else
+   (throw (Exception. "Don't know how to extract resources."))
+   ))
 
 (defn render
   "Prepares a tmp directory with all templates and returns a path to it"
@@ -47,10 +69,10 @@
 
     (FileUtils/forceMkdir (io/file dest-path))
 
-    (extract-resources dest-path #"assets(.*)")
-    (extract-resources dest-path #"templates(.*)")
-    (extract-resources dest-path #"src(.*)")
-    (extract-resources dest-path #"template.project.clj")
+    (extract-resources dest-path "assets")
+    (extract-resources dest-path "templates")
+    (extract-resources dest-path "src")
+    (extract-resources dest-path "template.project.clj")
 
     (FileUtils/moveDirectoryToDirectory
      (io/file (str dest-path "/src" ))
@@ -142,7 +164,7 @@
        :y-type      :measure
        :series-type :bubble
        :data        clusters
-       :series      (conj fields :cluster-id)}
+       :series      [(first fields) (second fields) :cluster-id]}
       (or (first config-overrides) {})))))
 
 
@@ -218,7 +240,7 @@
     ]))
 
 (comment
-  (-> (clojure.java.io/resource "assets")
+  (-> (io/resource "assets")
       (.getPath )
       (.replace "!/assets" "")
       (.replace "file:" "")
