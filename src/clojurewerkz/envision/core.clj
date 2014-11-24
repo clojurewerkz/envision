@@ -28,8 +28,10 @@
 
 (defn extract-resources [dest-path filename]
   (cond
-   (= PlainTextInputStream
-      (type (.getContent (io/resource "template.project.clj"))))
+   (or (= PlainTextInputStream
+          (type (.getContent (io/resource "template.project.clj"))))
+       (= java.io.BufferedInputStream
+          (type (.getContent (io/resource "template.project.clj")))))
    (let [file (io/file (clojure.java.io/resource filename))]
      (if (.isDirectory file)
        (FileUtils/copyDirectoryToDirectory
@@ -192,6 +194,24 @@
              [:a :b :c]
              2
              100)])
+
+  (render
+   [(cfg/make-chart-config
+     {:id            "line"
+      :headline      "Line Chart"
+      :x             :timestamp
+      :y             :value
+      :x-config      {:order-rule "time"
+                      :tick-format "%H:%M"}
+
+      :y-type        :measure
+      :x-type        :time
+      :series-type   "line"
+      ;; :data          (json/decode (slurp "/Users/ifesdjeen/hackage/continuum/result.json") true)
+      :series        :subtype
+      :interpolation :cardinal
+      })]
+   )
 
   (render
    [(histogram 10 (take 100 (distribution/normal-distribution 5 10))
