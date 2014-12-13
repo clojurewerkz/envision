@@ -4,7 +4,6 @@
             [clojure.set             :as set]
             [schema.core             :as s]
 
-
             [clojurewerkz.envisioncljs.button       :as b]
             [clojurewerkz.envisioncljs.chart_config :as cfg]
             [clojurewerkz.envisioncljs.dimple       :as dimple]
@@ -27,21 +26,17 @@
   (ChartState. nil false false))
 
 (defn- init-chart
-  [this chart-config chart-state]
+  [this chart-config chart-state-atom chart-data-atom]
   (let [chart (dimple/make-chart (u/dom-node this)
                                  (sm/safe-get chart-config :width)
                                  (sm/safe-get chart-config :height)
                                  )]
 
     (validate-chart-state
-     (swap! chart-state #(assoc %
-                           :chart chart)))
+     (swap! chart-state-atom #(assoc % :chart chart)))
 
     (-> chart
-        (dimple/set-data     (clj->js
-                              (->> (sm/safe-get chart-config :data)
-                                   identity
-                                   )))
+        (dimple/set-data     (clj->js @chart-data-atom))
         (dimple/add-axis     (sm/safe-get chart-config :x-type)
                              "x"
                              (sm/safe-get chart-config :x)
@@ -117,21 +112,38 @@
                                                                  %))
                             (dimple/draw)))]]))
 
+(defn- redraw
+  [chart-config chart-state-atom chart-data-atom]
+  (let [st       @chart-state-atom
+        chart    (sm/safe-get st :chart)]
+    (-> chart
+        (dimple/set-data (clj->js @chart-data-atom))
+        (dimple/draw))))
+
 (defn chart
-  [chart-config chart-state]
+  [chart-config chart-state-atom chart-data-atom]
   (with-meta (fn []
-               (let [a  @chart-state
-                     id (sm/safe-get chart-config :id)]
+               (let [chart-state @chart-state-atom
+                     chart-data  @chart-data-atom
+                     id          (sm/safe-get chart-config :id)]
                  [:div {:class "highlight col-md-6 envision-chart"
+                        :id   id
                         :key   id}
                   [:h1 (sm/safe-get chart-config :headline)]
-                  ;; (plugin chat-config chart-sate)
                   ]))
     {:component-did-mount (fn [this]
                             (init-chart this
                                         chart-config
-                                        chart-state
-                                        ))}))
+                                        chart-state-atom
+                                        chart-data-atom
+                                        ))
+     :component-did-update (fn [_ _ _]
+                             (println 'update (sm/safe-get chart-config :id))
+                             (redraw chart-config
+                                     chart-state-atom
+                                     chart-data-atom))
+     }))
+
 
 
 (defn table
@@ -191,10 +203,10 @@
               [:div.col-md-6
                [table (atom (:data config))]
                ]
-            [(chart
-              (cfg/make-chart-config config)
-              (atom (make-empty-chart-state))
-              )]
+              ;; [(chart
+              ;;   (cfg/make-chart-config config)
+              ;;   (atom (make-empty-chart-state))
+              ;; )]
             ))])])))
 
-(reagent/render-component [chart-app] (.getElementById js/document "app"))
+;; (reagent/render-component [chart-app] (.getElementById js/document "app"))

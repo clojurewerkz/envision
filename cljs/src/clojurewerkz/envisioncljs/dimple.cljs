@@ -134,7 +134,6 @@
 
     (doseq [[k field] fields]
       (when-let [v (sm/safe-get axis-config k)]
-        (println k v field)
         (aset axis field v))))
 
   (when-let [v (sm/safe-get axis-config :order-rule)]
