@@ -203,7 +203,6 @@
       :y             :value
       :x-config      {:order-rule "time"
                       :tick-format "%H:%M"}
-
       :y-type        :measure
       :x-type        :time
       :series-type   "line"

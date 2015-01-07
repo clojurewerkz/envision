@@ -138,7 +138,6 @@
                                         chart-data-atom
                                         ))
      :component-did-update (fn [_ _ _]
-                             (println 'update (sm/safe-get chart-config :id))
                              (redraw chart-config
                                      chart-state-atom
                                      chart-data-atom))
@@ -189,6 +188,7 @@
              [:tr
               (for [[_ v] row]
                 [:td (str v)])])]]]))))
+
 
 (defn chart-app
   []
