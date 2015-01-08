@@ -63,38 +63,99 @@
 
 (def numerical-type? #(get numerical-types %))
 
+(defn toggle
+  [coll item]
+  (if (get coll item)
+    (disj coll item)
+    (conj coll item)))
+
 (defn chart-app
   []
-  (let [wrapper-state-atom (atom {:selected-collection (first (keys configuration-data))})]
+  (let [wrapper-state-atom (atom {:selected-collection  "system.mem"
+                                  :selected-fields      (->> (get configuration-data "system.mem")
+                                                             (filter #(numerical-type? (second %)))
+                                                             keys
+                                                             set)
+                                  :selected-time-period 0
+                                  :selected-aggregate   nil
+                                  })]
     (fn []
-      (let [wrapper-state @wrapper-state-atom]
-        [:div {:key "wrapper"}
-         [:select {:key      "collection-select-box"
-                   :onChange #(swap! wrapper-state-atom
-                                     update-in [:selected-collection]
-                                     (constantly (-> % (.-target) js/jQuery (.val))))}
-          [:option {:key "empty"} "-"] ;; TODO: key here
-          (for [coll (keys configuration-data)]
-            [:option {:key coll} coll])]
-         (if-let [coll (:selected-collection wrapper-state)]
-           [:div {:key "wrapper-config"}
-            [:h3 {:key "wrapper-header"} coll]
-            [:table {:key (str "y-columns-" coll)
-                     :class "table striped"}
-             (for [[column type] (->> (get configuration-data coll)
-                                      (filter #(numerical-type? (second %))  ))]
-               [:tr
-                [:td column]
-                [:td type]
-                ])
-             ]
-            ]
-           [:div {:key "wrapper-config"}
-            "empty"])
+      (let [{:keys [selected-collection
+                    selected-fields
+                    selected-time-period
+                    selected-aggregate]}
+            @wrapper-state-atom]
+        [:div.row
+         [:div.col-md-6 {:key "wrapper"}
+          [:div
+           [:h3 "Time Period"]
+           [:div.btn-group
+            (for [[name time-period] {"None"  0
+                                      "1 min" 1000
+                                      "5 min" 5000
+                                      "10 min" 10000}]
+              [:button.btn {:onClick #(swap! wrapper-state-atom
+                                             update-in [:selected-time-period]
+                                             (constantly time-period))
+                            :class (if (= time-period selected-time-period)
+                                     "btn-active"
+                                     "btn-default")}
+               name]
+              )]]
+          (if selected-collection
+            [:div {:key "wrapper-config"}
+             [:h3 "Collection"]
+             [:select {:key      "collection-select-box"
+                       :value    selected-collection
+                       :onChange #(do
+                                    (swap! wrapper-state-atom
+                                           update-in [:selected-fields]
+                                           (constantly []))
+                                    (swap! wrapper-state-atom
+                                           update-in [:selected-collection]
+                                           (constantly (-> % (.-target) js/jQuery (.val)))))}
+              [:option {:key "empty"} "-"] ;; TODO: key here
+              (for [coll (keys configuration-data)]
+                [:option {:key coll} coll])]
+             [:br][:br]
+             [:table {:key (str "y-columns-" selected-collection)
+                      :class "table striped"}
+              (for [[column type] (->> (get configuration-data selected-collection)
+                                       (filter #(numerical-type? (second %))  ))]
+                [:tr {:onClick #(swap! wrapper-state-atom
+                                       update-in [:selected-fields]
+                                       (fn [a] (toggle a column)))
+                      :class   (if (not (nil? (get selected-fields column)))
+                                 "active"
+                                 ""
+                                 )}
+                 [:td column]
+                 [:td type]
+                 ])
+              ]]
+            [:div {:key "wrapper-config"}
+             "empty"])
+          [:div
+           [:h3 "Aggregate"]
+           [:div.btn-group
+            (for [[name aggregate] {"None"  nil
+                                    "Avg" "Avg"
+                                    "Min" "Min"
+                                    "Max" "Max"}]
+              [:button.btn {:onClick #(swap! wrapper-state-atom
+                                             update-in [:selected-aggregate]
+                                             (constantly aggregate))
+                            :class (if (= aggregate selected-aggregate)
+                                     "btn-active"
+                                     "btn-default")}
+               name]
+              )]]
+          ]
 
-
-
-         ])
+         (dynamic-chart selected-collection
+                        (transpose-data (map keyword selected-fields)))
+         ]
+        )
 
       ;; (dynamic-chart "system.mem"
       ;;                (transpose-data [:free :used :actual_free :total :actual_used :ram]))
