@@ -2,6 +2,7 @@
   (:require-macros [schema.macros :as sm])
   (:require [reagent.core            :as reagent :refer [atom]]
             [clojure.set             :as set]
+            [cljs.reader             :as reader]
             [schema.core             :as s]
 
             [clojurewerkz.envisioncljs.button       :as b]
@@ -30,7 +31,9 @@
 (defn dynamic-chart
   [metric-type transposer]
   (let [chart-data (atom [])]
-    (.ajax js/jQuery (str "http://localhost:3000/dbs/" metric-type "/range")
+    (.ajax js/jQuery
+           ;;(str "http://localhost:3000/dbs/" metric-type "/range")
+           "/dbs/system.mem/range?timeGroup=500000&aggregate=min&fields=free,used,actual_free,total,actual_used,ram"
            (clj->js {:success (fn [data]
                                 (reset! chart-data (transposer
                                                     (js->clj data :keywordize-keys true))))}))
@@ -54,7 +57,18 @@
                     :y     (get datapoint value)
                     :group value})
                  data)))
-         flatten)))
+         flatten
+
+         )))
+
+(defn transpose-group-data
+  [values]
+  (fn [data]
+    (->> data
+         (map (fn [[ts e]] (assoc e :timestamp (reader/read-string (name ts)))))
+         ((transpose-data values))
+         )
+    ))
 
 (def configuration-data
   {"system.tcp" {"in_segs" "DbtLong","retrans_segs" "DbtLong","out_segs" "DbtLong","passive_opens" "DbtLong","attempt_fails" "DbtLong","active_opens" "DbtLong","out_rsts" "DbtLong","curr_estab" "DbtLong","host" "DbtString","estab_resets" "DbtLong","in_errs" "DbtLong"},"system.mem.percent" {"free" "DbtLong","used" "DbtLong","actual_free" "DbtLong","total" "DbtLong","host" "DbtString","actual_used" "DbtLong","ram" "DbtLong"},"system.mem" {"free" "DbtLong","used" "DbtLong","actual_free" "DbtLong","total" "DbtLong","host" "DbtString","actual_used" "DbtLong","ram" "DbtLong"},"system.net" {"tcp_inbound_total" "DbtLong","all_inbound_total" "DbtLong","tcp_outbound_total" "DbtLong","all_outbound_total" "DbtLong","host" "DbtString"},"system.cpu" {"idle" "DbtDouble","stolen" "DbtDouble","irq" "DbtDouble","wait" "DbtDouble","soft_irq" "DbtDouble","sys" "DbtDouble","user" "DbtDouble","combined" "DbtDouble","host" "DbtString","nice" "DbtDouble"}})
@@ -153,7 +167,7 @@
           ]
 
          (dynamic-chart selected-collection
-                        (transpose-data (map keyword selected-fields)))
+                        (transpose-group-data (map keyword selected-fields)))
          ]
         )
 
