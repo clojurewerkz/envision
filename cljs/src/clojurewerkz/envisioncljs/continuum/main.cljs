@@ -29,18 +29,24 @@
    })
 
 (defn dynamic-chart
-  [metric-type transposer]
+  [collection fields time-period aggregate transposer]
   (let [chart-data (atom [])]
     (.ajax js/jQuery
-           ;;(str "http://localhost:3000/dbs/" metric-type "/range")
-           "/dbs/system.mem/range?timeGroup=500000&aggregate=min&fields=free,used,actual_free,total,actual_used,ram"
+           ;;(str "http://localhost:3000/dbs/" collection "/range")
+           (str
+            "/dbs/system.mem/range?timeGroup="
+            time-period
+            "&aggregate="
+            aggregate
+            "&fields="
+            (clojure.string/join "," fields))
            (clj->js {:success (fn [data]
                                 (reset! chart-data (transposer
                                                     (js->clj data :keywordize-keys true))))}))
     [(chart/chart
-      (cfg/make-chart-config (assoc (test-graph-config metric-type)
-                               :id metric-type
-                               :headline metric-type))
+      (cfg/make-chart-config (assoc (test-graph-config collection)
+                               :id collection
+                               :headline collection))
       (atom (chart/make-empty-chart-state))
       chart-data)]
 
@@ -90,7 +96,7 @@
                                                              (filter #(numerical-type? (second %)))
                                                              keys
                                                              set)
-                                  :selected-time-period 0
+                                  :selected-time-period (* 60 1000)
                                   :selected-aggregate   nil
                                   })]
     (fn []
@@ -105,9 +111,9 @@
            [:h3 "Time Period"]
            [:div.btn-group
             (for [[name time-period] {"None"  0
-                                      "1 min" 1000
-                                      "5 min" 5000
-                                      "10 min" 10000}]
+                                      "1 min" (* 60 1000)
+                                      "5 min" (* 5 60 1000)
+                                      "10 min"(* 10 60 1000)}]
               [:button.btn {:onClick #(swap! wrapper-state-atom
                                              update-in [:selected-time-period]
                                              (constantly time-period))
@@ -153,9 +159,9 @@
            [:h3 "Aggregate"]
            [:div.btn-group
             (for [[name aggregate] {"None"  nil
-                                    "Avg" "Avg"
-                                    "Min" "Min"
-                                    "Max" "Max"}]
+                                    "Avg" "mean"
+                                    "Min" "min"
+                                    "Max" "max"}]
               [:button.btn {:onClick #(swap! wrapper-state-atom
                                              update-in [:selected-aggregate]
                                              (constantly aggregate))
@@ -167,6 +173,9 @@
           ]
 
          (dynamic-chart selected-collection
+                        selected-fields
+                        selected-time-period
+                        selected-aggregate
                         (transpose-group-data (map keyword selected-fields)))
          ]
         )
