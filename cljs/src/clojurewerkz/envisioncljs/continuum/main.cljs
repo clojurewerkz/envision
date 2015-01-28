@@ -1,15 +1,47 @@
 (ns clojurewerkz.envisioncljs.continuum.main
   (:require-macros [schema.macros :as sm])
-  (:require [reagent.core            :as reagent :refer [atom]]
-            [clojure.set             :as set]
-            [cljs.reader             :as reader]
-            [schema.core             :as s]
+  (:require [reagent.core                           :as reagent :refer [atom]]
+            [clojure.set                            :as set]
+            [cljs.reader                            :as reader]
+            [schema.core                            :as s]
 
             [clojurewerkz.envisioncljs.button       :as b]
             [clojurewerkz.envisioncljs.chart_config :as cfg]
             [clojurewerkz.envisioncljs.dimple       :as dimple]
             [clojurewerkz.envisioncljs.utils        :as u]
-            [clojurewerkz.envisioncljs.chart        :as chart]))
+            [clojurewerkz.envisioncljs.chart        :as chart]
+
+            [goog.Timer                             :as timer]
+            [goog.events                            :as events]
+            ))
+
+;;
+;; Configurations
+;;
+
+(sm/defrecord SelectBoxData
+    [^{:s [s/Any] } kvps
+     ^{:s s/Any   } default-value])
+
+(def time-period--select-box-data
+  (SelectBoxData.
+   {"5 sec"  (* 5 1000)
+    "10 sec" (* 10 1000)
+    "1 min"  (* 60 1000)
+    "5 min"  (* 5 60 1000)
+    "10 min" (* 10 60 1000)}
+   (* 5 1000)))
+
+(def aggregate--select-box-data
+  (SelectBoxData.
+   {"Median" "median"
+    "Avg"    "mean"
+    "Min"    "min"
+    "Max"    "max"}
+   "median"))
+
+(def default-value #(sm/safe-get % :default-value))
+(def kvps #(sm/safe-get % :kvps))
 
 (enable-console-print!)
 
@@ -28,14 +60,64 @@
    :interpolation :cardinal
    })
 
+
+(defn fetch-data
+  []
+  (.ajax js/jQuery
+         ;;(str "http://localhost:3000/dbs/" collection "/range")
+         (str
+          "/dbs/"
+          collection
+          "/range"
+          "?timeGroup="
+          time-period
+          "&from="
+          (- current-time (* 100 time-period))
+          "&to"
+          current-time
+          "&aggregate="
+          aggregate
+          "&fields="
+          (clojure.string/join "," fields))
+         (clj->js {:success (fn [data]
+                              (reset! chart-data (transposer
+                                                  (js->clj data :keywordize-keys true))))})))
 (defn dynamic-chart
-  [collection fields time-period aggregate transposer]
-  (let [chart-data (atom [])]
+  [timer collection fields time-period aggregate transposer]
+  (let [chart-data   (atom [])
+        current-time (.getTime (js/Date.))]
+    (events/listen timer goog.Timer/TICK
+                   #(.ajax js/jQuery
+                           ;;(str "http://localhost:3000/dbs/" collection "/range")
+                           (str
+                            "/dbs/"
+                            collection
+                            "/range"
+                            "?timeGroup="
+                            time-period
+                            "&from="
+                            (- current-time (* 100 time-period))
+                            "&to"
+                            current-time
+                            "&aggregate="
+                            aggregate
+                            "&fields="
+                            (clojure.string/join "," fields))
+                           (clj->js {:success (fn [data]
+                                                (reset! chart-data (transposer
+                                                                    (js->clj data :keywordize-keys true))))})))
     (.ajax js/jQuery
            ;;(str "http://localhost:3000/dbs/" collection "/range")
            (str
-            "/dbs/system.mem/range?timeGroup="
+            "/dbs/"
+            collection
+            "/range"
+            "?timeGroup="
             time-period
+            "&from="
+            (- current-time (* 100 time-period))
+            "&to"
+            current-time
             "&aggregate="
             aggregate
             "&fields="
@@ -91,13 +173,15 @@
 
 (defn chart-app
   []
-  (let [wrapper-state-atom (atom {:selected-collection  "system.mem"
+  (let [timer              (doto (goog.Timer. 10000) (.start))
+        wrapper-state-atom (atom {:selected-collection  "system.mem"
                                   :selected-fields      (->> (get configuration-data "system.mem")
                                                              (filter #(numerical-type? (second %)))
                                                              keys
                                                              set)
-                                  :selected-time-period (* 60 1000)
-                                  :selected-aggregate   nil
+                                  :selected-time-period (default-value time-period--select-box-data)
+                                  :selected-aggregate   (default-value aggregate--select-box-data)
+
                                   })]
     (fn []
       (let [{:keys [selected-collection
@@ -110,10 +194,7 @@
           [:div
            [:h3 "Time Period"]
            [:div.btn-group
-            (for [[name time-period] {"None"  0
-                                      "1 min" (* 60 1000)
-                                      "5 min" (* 5 60 1000)
-                                      "10 min"(* 10 60 1000)}]
+            (for [[name time-period] (kvps time-period--select-box-data)]
               [:button.btn {:onClick #(swap! wrapper-state-atom
                                              update-in [:selected-time-period]
                                              (constantly time-period))
@@ -127,13 +208,18 @@
              [:h3 "Collection"]
              [:select {:key      "collection-select-box"
                        :value    selected-collection
-                       :onChange #(do
-                                    (swap! wrapper-state-atom
-                                           update-in [:selected-fields]
-                                           (constantly []))
-                                    (swap! wrapper-state-atom
-                                           update-in [:selected-collection]
-                                           (constantly (-> % (.-target) js/jQuery (.val)))))}
+                       :onChange (fn [select-box]
+                                   (let [collection (-> select-box (.-target) js/jQuery (.val))]
+                                     (swap! wrapper-state-atom
+                                            update-in [:selected-fields]
+                                            (constantly
+                                             (->> (get configuration-data collection)
+                                                  (filter #(numerical-type? (second %)))
+                                                  keys
+                                                  set)))
+                                     (swap! wrapper-state-atom
+                                            update-in [:selected-collection]
+                                            (constantly collection))))}
               [:option {:key "empty"} "-"] ;; TODO: key here
               (for [coll (keys configuration-data)]
                 [:option {:key coll} coll])]
@@ -158,10 +244,7 @@
           [:div
            [:h3 "Aggregate"]
            [:div.btn-group
-            (for [[name aggregate] {"None"  nil
-                                    "Avg" "mean"
-                                    "Min" "min"
-                                    "Max" "max"}]
+            (for [[name aggregate] (kvps aggregate--select-box-data)]
               [:button.btn {:onClick #(swap! wrapper-state-atom
                                              update-in [:selected-aggregate]
                                              (constantly aggregate))
@@ -172,7 +255,8 @@
               )]]
           ]
 
-         (dynamic-chart selected-collection
+         (dynamic-chart timer
+                        selected-collection
                         selected-fields
                         selected-time-period
                         selected-aggregate
