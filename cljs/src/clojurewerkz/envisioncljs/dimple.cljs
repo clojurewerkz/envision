@@ -1,6 +1,7 @@
 (ns clojurewerkz.envisioncljs.dimple
   (:require-macros [schema.macros :as sm])
-  (:require [schema.core             :as s]))
+  (:require [schema.core                            :as s]
+            [clojurewerkz.envisioncljs.chart_config :as cfg]))
 
 (sm/defrecord Interpolations
     [^{:s s/Str} linear
@@ -211,14 +212,27 @@
   chart)
 
 (defn add-series
-  [chart series-literals series-type {:keys [interpolation data force-data] :as cfg}]
-  (let [series (.addSeries chart
-                           (clj->js series-literals)
-                           (sm/safe-get series-type-constructors
-                                        series-type))]
+  [chart series-literals series-type {:keys [interpolation data force-data y y-type y-config] :as conf}]
+  (let [series (if (and y y-config y-type)
+                 (do
+                   (add-axis chart
+                             (keyword y-type)
+                             "y"
+                             y
+                             (cfg/make-axis-config y-config))
+                   (.addSeries chart
+                               (clj->js series-literals)
+                               (sm/safe-get series-type-constructors
+                                            series-type)
+                               (clj->js [(first (.-axes chart))
+                                         (last (.-axes chart))])))
+                 (.addSeries chart
+                             (clj->js series-literals)
+                             (sm/safe-get series-type-constructors
+                                          series-type)))]
 
     (when interpolation
-      (set! (.-interpolation series) (sm/safe-get interpolations interpolation)))
+      (set! (.-interpolation series) (sm/safe-get interpolations (keyword interpolation))))
 
     (when data
       (set! (.-chartData series) (clj->js data)))
@@ -239,9 +253,9 @@
 (defn set-axis-measure
   [chart axis measure]
   (let [axe (->> chart
-                  (.-axes)
-                  (filter #(= axis (.-position %)))
-                  first
-                  )]
+                 (.-axes)
+                 (filter #(= axis (.-position %)))
+                 first
+                 )]
     (aset axe "measure" measure))
   chart)

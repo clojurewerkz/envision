@@ -54,6 +54,7 @@
         ((fn [chart]
            (when-let [additional-series (sm/safe-get chart-config :additional-series)]
              (doseq [[type config] (partition 2 additional-series)]
+
                (dimple/add-series chart
                                   (.-categoryFields (first (.-series chart)))
                                   (keyword type)
@@ -126,7 +127,7 @@
                (let [chart-state @chart-state-atom
                      chart-data  @chart-data-atom
                      id          (sm/safe-get chart-config :id)]
-                 [:div {:class "highlight col-md-6 envision-chart"
+                 [:div {:class "highlight col-md-12 envision-chart"
                         :id   id
                         :key   id}
                   [:h1 (sm/safe-get chart-config :headline)]
@@ -188,5 +189,3 @@
              [:tr
               (for [[_ v] row]
                 [:td (str v)])])]]]))))
-
-
