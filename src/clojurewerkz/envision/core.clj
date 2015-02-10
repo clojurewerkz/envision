@@ -1,14 +1,14 @@
 (ns clojurewerkz.envision.core
   (:import [org.apache.commons.io FileUtils]
            [sun.net.www.protocol.jar JarURLConnection$JarURLInputStream]
-           [sun.net.www.content.text PlainTextInputStream]
-           )
-  (:require [cheshire.core                      :as json]
-            [clojure.java.io                    :as io]
-            [schema.core                        :as s]
-            [clojurewerkz.envision.chart-config :as cfg]
+           [sun.net.www.content.text PlainTextInputStream])
 
-            [clojurewerkz.envision.util         :refer [deep-merge add-serial-ids]]
+  (:require [cheshire.core                              :as json]
+            [clojure.java.io                            :as io]
+            [schema.core                                :as s]
+            [clojurewerkz.envision.chart-config         :as cfg]
+
+            [clojurewerkz.envision.util                 :refer [deep-merge add-serial-ids]]
 
             [clojurewerkz.statistiker.clustering.kmeans :as km]
             [clojurewerkz.statistiker.clustering.dbscan :as dbs]
