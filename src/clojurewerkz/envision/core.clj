@@ -1,7 +1,8 @@
 (ns clojurewerkz.envision.core
   (:import [org.apache.commons.io FileUtils]
            [sun.net.www.protocol.jar JarURLConnection$JarURLInputStream]
-           [sun.net.www.content.text PlainTextInputStream])
+           [sun.net.www.content.text PlainTextInputStream]
+           [java.io File])
 
   (:require [cheshire.core                              :as json]
             [clojure.java.io                            :as io]
@@ -66,7 +67,7 @@
 (defn render
   "Prepares a tmp directory with all templates and returns a path to it"
   [data]
-  (let [dest-path (str (FileUtils/getTempDirectoryPath) (temp-name "envision-") "/")
+  (let [dest-path (str (FileUtils/getTempDirectoryPath) File/separator (temp-name "envision-") File/separator)
         index     (str dest-path "/index.html")]
 
     (FileUtils/forceMkdir (io/file dest-path))
